@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monturas La Gitanilla</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Alegreya+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE occasion: an artisan saddlery's showroom, proud and elegant
+   IDEA the brand's own black-and-gold sign: LG monogram, engraved gold on black leather
+   PICTURE a tooled saddle on a wooden stand under a warm gold showroom light
+   COLOUR black ground, gold lead, leather browns support, deep red accent for exotics
+   TYPE Cinzel (engraved capitals, like the logo) + Alegreya Sans
+   LAYOUT hero scene full-bleed with name top-left; catalog grid; stacks on phone */
+:root{color-scheme:dark;--bg:#0d0b09;--ink:#f3ead9;--soft:#bfae94;--panel:#17130f;--line:#33291d;--gold:#d4ad5a;--gold2:#a9822f;--lea:#1c150f;--wa:#25a366;--wad:#1c7f4f}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Alegreya Sans",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Cinzel,Georgia,serif;font-weight:700;line-height:1.08;text-wrap:balance;margin:0}
+h2{font-size:clamp(30px,4.2vw,44px);color:var(--gold)}
+h3{font-size:19px}
+p{margin:0}
+a{color:inherit}
+img,svg{max-width:100%}
+.band{padding-block:clamp(36px,5vw,72px);padding-inline:max(5vw,16px)}
+.wrap{max-width:1240px;margin-inline:auto}
+nav{position:sticky;top:0;z-index:5;background:#080706;border-bottom:1px solid var(--line);padding:10px max(5vw,16px)}
+nav .wrap{display:flex;align-items:center;gap:8px 22px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-family:Cinzel,serif;font-weight:700;font-size:19px;text-decoration:none;margin-right:auto;white-space:nowrap;color:var(--gold)}
+.logo svg{width:40px;height:40px}
+nav a.l{text-decoration:none;font-weight:500;padding:8px 2px}
+nav a.l:hover{color:var(--gold)}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 20px;border-radius:999px;border:0;font:700 16px "Alegreya Sans",sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:focus-visible,.chip:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wa{background:var(--wa);color:#fff}
+.wa:hover{background:var(--wad)}
+.gold{background:var(--gold);color:#1a1209}
+.gold:hover{background:#e6c374}
+.ghost{background:transparent;color:var(--gold);box-shadow:inset 0 0 0 2px var(--gold)}
+.hero{position:relative;background:var(--bg);overflow:hidden}
+.scene{position:relative;height:clamp(440px,58vw,640px)}
+.scene>svg{position:absolute;inset:0;width:100%;height:100%}
+.copy{position:absolute;top:clamp(24px,5vw,64px);left:max(5vw,16px);max-width:min(540px,90vw)}
+.since{color:var(--gold);font-weight:700;font-size:17px}
+.copy h1{font-size:clamp(38px,6vw,72px);color:#fff4dc;margin-top:6px}
+.copy p.t{margin-top:14px;font-size:clamp(17px,1.6vw,20px);max-width:30em;color:#e9dcc4}
+.copy .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.facts{background:var(--lea);border-block:1px solid var(--line)}
+.facts .wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(12em,1fr));gap:18px 28px}
+.facts b{display:block;font-size:19px;color:var(--gold)}
+.facts p{color:var(--soft)}
+.head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.head p{color:var(--soft);max-width:36em}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.chip{min-height:44px;padding:0 18px;border-radius:999px;border:2px solid var(--line);background:transparent;color:var(--ink);font:500 16px "Alegreya Sans",sans-serif;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:#1a1209}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.pic{background:radial-gradient(circle at 50% 40%,#4a3518,#14100b 75%);aspect-ratio:4/3;display:grid;place-items:end center}
+.pic svg{width:86%;height:auto}
+.info{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.cat{font-size:14px;color:var(--gold)}
+.info ul{margin:0;padding-left:18px;color:var(--soft);font-size:15px}
+.buy{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:10px;flex-wrap:wrap}
+.price{font-size:16px;font-weight:700;color:var(--soft)}
+.note{font-size:14px;color:var(--soft);margin-top:20px}
+.how{background:var(--lea);border-block:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:26px;margin-top:26px}
+.step svg{width:64px;height:64px;display:block;margin-bottom:10px}
+.step p{color:var(--soft);margin-top:6px}
+.contact .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
+form{display:grid;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+label{font-weight:700;font-size:15px;display:grid;gap:6px}
+input,select,textarea{font:16px "Alegreya Sans",sans-serif;padding:11px 12px;border-radius:10px;border:2px solid var(--line);background:#0d0b09;color:var(--ink);width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+.data{display:grid;gap:14px;margin-top:20px}
+.data div{border-top:1px solid var(--line);padding-top:12px}
+.data b{display:block;color:var(--gold)}
+.data a{text-decoration-color:var(--gold2)}
+.msg{font-size:15px;color:var(--gold);min-height:1.4em}
+.msg a{color:var(--gold)}
+footer{background:#080706;border-top:1px solid var(--line);color:var(--soft);font-size:15px}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+@media(max-width:760px){.contact .wrap{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){nav a.l{display:none}.logo span{font-size:16px}.scene{height:auto}.scene>svg{position:relative;height:300px}.copy{position:static;padding:28px 16px 4px;max-width:none}}
+@media(prefers-reduced-motion:no-preference){#glow{animation:glow 2.4s ease-out both}@keyframes glow{from{opacity:0}to{opacity:1}}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3d68c"/><stop offset=".5" stop-color="#c99a3e"/><stop offset="1" stop-color="#8c6522"/></linearGradient>
+<symbol id="lg" viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="47" fill="#0d0b09" stroke="url(#g)" stroke-width="4"/>
+<circle cx="50" cy="50" r="40" fill="none" stroke="url(#g)" stroke-width="1.2"/>
+<text x="41" y="62" text-anchor="middle" font-family="Cinzel,Georgia,serif" font-weight="700" font-size="38" fill="url(#g)">L</text>
+<text x="58" y="68" text-anchor="middle" font-family="Cinzel,Georgia,serif" font-weight="700" font-size="38" fill="url(#g)">G</text>
+</symbol>
+<symbol id="saddle" viewBox="0 0 200 150">
+<ellipse cx="102" cy="142" rx="78" ry="6" fill="#000" opacity=".35"/>
+<path d="M26 82 Q100 102 176 72 L180 108 Q102 128 30 112 Z" fill="var(--s2,#2a1408)"/>
+<path d="M34 92 Q100 108 170 82" fill="none" stroke="var(--st,#d4ad5a)" stroke-width="1.6" stroke-dasharray="4 4"/>
+<path d="M30 56 Q62 46 92 64 Q122 78 150 44 Q158 32 168 38 L172 74 Q120 96 40 88 Q24 76 30 56 Z" fill="var(--s1,#6b3a1f)"/>
+<path d="M40 60 Q66 54 92 70 Q120 84 152 54" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="3"/>
+<path d="M150 44 Q158 32 168 38 L171 60 Q160 52 150 44 Z" fill="var(--s2,#2a1408)"/>
+<path d="M38 56 L44 30 Q47 24 54 26 L50 58 Z" fill="var(--s2,#2a1408)"/>
+<ellipse cx="49" cy="26" rx="11" ry="4.5" fill="var(--st,#d4ad5a)" stroke="var(--s2,#2a1408)" stroke-width="2"/>
+<g fill="var(--st,#d4ad5a)"><circle cx="70" cy="74" r="2.6"/><circle cx="120" cy="78" r="2.6"/><circle cx="150" cy="66" r="2.6"/><circle cx="56" cy="98" r="2.6"/><circle cx="150" cy="96" r="2.6"/></g>
+<path d="M88 78 Q112 84 120 76 L124 124 Q106 132 90 126 Z" fill="var(--s1,#6b3a1f)" stroke="var(--s2,#2a1408)" stroke-width="2"/>
+<path d="M94 88 Q106 98 116 88 M94 104 Q106 114 118 104" fill="none" stroke="var(--st,#d4ad5a)" stroke-width="1.6"/>
+<path d="M90 126 h36 v10 q-18 7 -36 0 Z" fill="var(--s3,#d4ad5a)" stroke="var(--s2,#2a1408)" stroke-width="2"/>
+</symbol>
+</defs>
+</svg>
+
+<nav aria-label="Principal"><div class="wrap">
+<a class="logo" href="#inicio"><svg aria-hidden="true"><use href="#lg"/></svg><span>La Gitanilla</span></a>
+<a class="l" href="#catalogo">Catálogo</a>
+<a class="l" href="#taller">El taller</a>
+<a class="l" href="#contacto">Contacto</a>
+<a class="btn wa js-wa" href="#" data-msg="Hola, quiero información sobre sus monturas.">WhatsApp</a>
+</div></nav>
+
+<header class="hero" id="inicio">
+<div class="scene">
+<svg viewBox="0 0 900 560" preserveAspectRatio="xMidYMax slice" aria-label="Montura labrada sobre un caballete de madera en el taller">
+<defs>
+<radialGradient id="light" cx=".68" cy=".45" r=".55"><stop offset="0" stop-color="#5a3f17"/><stop offset=".55" stop-color="#21170c"/><stop offset="1" stop-color="#0d0b09"/></radialGradient>
+<linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a4f2a"/><stop offset="1" stop-color="#4a2e16"/></linearGradient>
+<linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e150c"/><stop offset="1" stop-color="#0d0b09"/></linearGradient>
+</defs>
+<rect width="900" height="560" fill="url(#light)"/>
+<g id="glow" stroke="#d4ad5a" stroke-opacity=".16" stroke-width="2" fill="none">
+<circle cx="612" cy="250" r="170"/><circle cx="612" cy="250" r="210"/><circle cx="612" cy="250" r="250"/>
+</g>
+<rect y="458" width="900" height="102" fill="url(#floor)"/>
+<path d="M0 458 H900" stroke="#3a2a17" stroke-width="2"/>
+<g transform="translate(462 300)">
+<rect x="-6" y="40" width="300" height="26" rx="6" fill="url(#wood)"/>
+<rect x="-6" y="40" width="300" height="6" rx="3" fill="#a77744"/>
+<path d="M20 66 L-10 166 H10 L44 66 Z M250 66 L284 166 H304 L274 66 Z M40 66 L60 166 H80 L66 66 Z M230 66 L214 166 H234 L254 66 Z" fill="#4a2e16"/>
+<ellipse cx="148" cy="170" rx="190" ry="10" fill="#000" opacity=".45"/>
+</g>
+<use href="#saddle" x="412" y="120" width="400" height="300" style="--s1:#3b1f10;--s2:#140a04;--s3:#e0bd6c;--st:#e0bd6c"/>
+</svg>
+<div class="copy">
+<p class="since">Talabartería · Hechas a mano desde 1992</p>
+<h1>Monturas La Gitanilla</h1>
+<p class="t">Monturas artesanales 100% personalizadas: charras, exóticas y de trabajo, labradas a mano en Unión de San Antonio, Jalisco. Enviamos a México y Estados Unidos.</p>
+<div class="row">
+<a class="btn gold" href="#catalogo">Ver catálogo</a>
+<a class="btn ghost js-wa" href="#" data-msg="Hola, quiero cotizar una montura personalizada.">Cotizar la mía</a>
+</div>
+</div>
+</div>
+</header>
+
+<section class="band facts" aria-label="Por qué La Gitanilla"><div class="wrap">
+<p><b>Desde 1992</b>Más de 30 años haciendo monturas a mano.</p>
+<p><b>100% personalizadas</b>Tú eliges cuero, color, herrajes y labrado.</p>
+<p><b>Pieles exóticas</b>Cocodrilo, avestruz y otros acabados especiales.</p>
+<p><b>Envíos a México y EE. UU.</b>Empacada, asegurada y con guía de rastreo.</p>
+</div></section>
+
+<section class="band" id="catalogo"><div class="wrap">
+<div class="head">
+<h2>Catálogo</h2>
+<p>Cada montura se hace sobre pedido. Elige un estilo y pregúntanos por WhatsApp: te mandamos fotos, opciones de piel y tiempo de entrega.</p>
+</div>
+<div class="chips" role="group" aria-label="Filtrar por tipo" id="chips"></div>
+<div class="grid" id="grid"></div>
+<p class="note">Modelos y teléfono de ejemplo: cámbialos por los reales y agrega fotos de tus monturas.</p>
+</div></section>
+
+<section class="band how" id="taller"><div class="wrap">
+<h2>Así se hace una montura</h2>
+<div class="steps">
+<div class="step">
+<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="22" width="52" height="20" rx="8" fill="#8a5a2e"/><rect x="12" y="16" width="10" height="10" rx="3" fill="#d4ad5a"/><rect x="6" y="22" width="52" height="5" rx="2.5" fill="#b98548"/></svg>
+<h3>1. El fuste</h3><p>La base de madera se forra y se ajusta a la medida del lomo del caballo.</p>
+</div>
+<div class="step">
+<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 18 Q32 8 56 18 V48 Q32 58 8 48 Z" fill="#5a2f17"/><path d="M14 24 Q32 16 50 24" fill="none" stroke="#d4ad5a" stroke-width="2" stroke-dasharray="4 3"/></svg>
+<h3>2. Corte y costura</h3><p>Cortamos el cuero o la piel exótica y cosemos faldas, asiento y arciones.</p>
+</div>
+<div class="step">
+<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24" fill="#3b1f10"/><path d="M32 14 Q42 24 32 32 Q22 40 32 50 M18 32 Q26 22 32 32 Q38 42 46 32" fill="none" stroke="#d4ad5a" stroke-width="2.4"/></svg>
+<h3>3. Labrado y herrajes</h3><p>Grabamos a mano flores, grecas o tus iniciales y montamos los herrajes.</p>
+</div>
+<div class="step">
+<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="18" width="44" height="34" rx="4" fill="#8a5a2e"/><path d="M10 28 H54 M32 18 V52" stroke="#3b1f10" stroke-width="3"/><circle cx="48" cy="14" r="8" fill="#d4ad5a"/><path d="M44 14 l3 3 l5-6" fill="none" stroke="#1a1209" stroke-width="2"/></svg>
+<h3>4. Empaque y envío</h3><p>Revisamos cada pieza, la empacamos y te mandamos la guía para rastrearla.</p>
+</div>
+</div>
+</div></section>
+
+<section class="band contact" id="contacto"><div class="wrap">
+<div>
+<h2>Cotiza tu montura</h2>
+<p style="margin-top:12px;color:var(--soft)">Llena los datos y se abre WhatsApp con tu mensaje listo para enviar.</p>
+<div class="data">
+<div><b>WhatsApp</b><span id="tel"></span></div>
+<div><b>Taller</b>Carretera Unión de San Antonio a San Diego, Unión de San Antonio, Jalisco, C.P. 47570</div>
+<div><b>Redes</b><a href="https://www.instagram.com/monturas_lagitanilla/">Instagram @monturas_lagitanilla</a> · Facebook: Talabartería La Gitanilla</div>
+</div>
+</div>
+<form id="f" novalidate>
+<label for="nom">Nombre<input id="nom" autocomplete="name" placeholder="Juan Pérez"></label>
+<label for="tipo">Estilo de montura<select id="tipo"></select></label>
+<label for="ciudad">Ciudad de envío<input id="ciudad" placeholder="Guadalajara, Jal. o Houston, TX"></label>
+<label for="nota">Detalles (piel, color, labrado, iniciales)<textarea id="nota" rows="3" placeholder="Piel de cocodrilo verde, herrajes dorados, iniciales J.P."></textarea></label>
+<button class="btn wa" type="submit">Enviar por WhatsApp</button>
+<p class="msg" id="msg" aria-live="polite"></p>
+</form>
+</div></section>
+
+<footer class="band"><div class="wrap">
+<span class="logo"><svg aria-hidden="true"><use href="#lg"/></svg><span>Monturas La Gitanilla</span></span>
+<span>Talabartería artesanal desde 1992 · Unión de San Antonio, Jalisco</span>
+</div></footer>
+
+<script>
+{
+const TEL="525555555555";
+const TELTXT="55 5555 5555 (ejemplo)";
+const items=[
+{n:"Montura charra de gala",c:"Charras",d:["Labrado floral completo","Herrajes de plata o dorados","Fuste reforzado"],v:"--s1:#1a1a1a;--s2:#050505;--s3:#cfd3d6;--st:#cfd3d6"},
+{n:"Montura charra de faena",c:"Charras",d:["Cuero grueso de res","Cabeza de cuerno amplia","Para lazo y trabajo diario"],v:"--s1:#6b3a1f;--s2:#2a1408;--st:#d4ad5a"},
+{n:"Montura charra roja",c:"Charras",d:["Cuero teñido en rojo","Costura y labrado contrastante","Herrajes plateados"],v:"--s1:#7a1414;--s2:#3a0808;--s3:#cfd3d6;--st:#e6e6e6"},
+{n:"Montura en piel de cocodrilo",c:"Exóticas",d:["Piel exótica a elegir color","Labrado combinado","Herrajes dorados"],v:"--s1:#0f5a32;--s2:#06301a;--st:#e0bd6c"},
+{n:"Montura en piel de avestruz",c:"Exóticas",d:["Acabado de punto natural","Asiento acolchado","Pieza de colección"],v:"--s1:#8a6a48;--s2:#3e2a17;--st:#e0bd6c"},
+{n:"Silla vaquera western",c:"Vaqueras",d:["Asiento de 15 o 16 pulgadas","Arciones anchas","Herrajes niquelados"],v:"--s1:#9a5a2b;--s2:#3e1f0c;--st:#f0d29a"},
+{n:"Montura infantil",c:"Vaqueras",d:["Asiento chico","Estribos ajustables","Para poni o caballo chico"],v:"--s1:#b07038;--s2:#4a2613;--st:#f0d29a"},
+{n:"Arciones y accesorios",c:"Accesorios",d:["Estribos, cabezadas y riendas","Labrado a juego con tu montura","Hechos a mano"],v:"--s1:#5a2f17;--s2:#2a1408;--st:#d4ad5a"}
+];
+const cats=["Todas",...new Set(items.map(i=>i.c))];
+const wa=m=>"https://wa.me/"+TEL+"?text="+encodeURIComponent(m);
+const chips=document.getElementById("chips"),grid=document.getElementById("grid");
+let cur="Todas";
+const render=()=>{
+chips.innerHTML=cats.map(c=>`<button class="chip" type="button" aria-pressed="${c===cur}" data-c="${c}">${c}</button>`).join("");
+grid.innerHTML=items.filter(i=>cur==="Todas"||i.c===cur).map(i=>`<article class="card">
+<div class="pic"><svg viewBox="0 0 200 150" role="img" aria-label="${i.n}"><use href="#saddle" style="${i.v}"/></svg></div>
+<div class="info"><span class="cat">${i.c}</span><h3>${i.n}</h3><ul>${i.d.map(x=>`<li>${x}</li>`).join("")}</ul>
+<div class="buy"><span class="price">Precio sobre pedido</span>
+<a class="btn wa" href="${wa("Hola, me interesa: "+i.n+". ¿Me pueden cotizar?")}">Cotizar</a></div></div></article>`).join("");
+};
+chips.addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(!b)return;cur=b.dataset.c;render();});
+render();
+for(const a of document.querySelectorAll(".js-wa"))a.href=wa(a.dataset.msg);
+document.getElementById("tel").textContent=TELTXT;
+const sel=document.getElementById("tipo");
+sel.innerHTML=items.map(i=>`<option>${i.n}</option>`).join("")+"<option>Otra / diseño propio</option>";
+document.getElementById("f").addEventListener("submit",e=>{
+e.preventDefault();
+const g=id=>document.getElementById(id).value.trim();
+const msg=document.getElementById("msg");
+if(!g("nom")){msg.textContent="Escribe tu nombre para continuar.";document.getElementById("nom").focus();return;}
+const t=`Hola, soy ${g("nom")}. Quiero cotizar: ${g("tipo")}.`+(g("ciudad")?` Envío a ${g("ciudad")}.`:"")+(g("nota")?` Detalles: ${g("nota")}`:"");
+msg.textContent="Listo. ";
+const a=document.createElement("a");a.href=wa(t);a.target="_blank";a.rel="noopener";a.textContent="Abrir WhatsApp con tu mensaje";
+msg.append(a);
+});
+}
+</script>
+</body>
+</html>
