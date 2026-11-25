@@ -54,7 +54,8 @@ dt{color:var(--soft)}dd{margin:0}
 .sum .tot{border-top:1px solid var(--line);padding-top:10px;font-weight:700}
 .now{display:flex;justify-content:space-between;align-items:baseline;gap:12px;background:rgba(212,173,90,.1);border:1px solid var(--gold2);border-radius:12px;padding:12px 14px;margin-top:10px}
 .now span:first-child{color:var(--gold);font-weight:700}
-.now span:last-child{font-family:Cinzel,serif;font-size:clamp(24px,3vw,30px);color:#fff4dc;white-space:nowrap}
+.now{flex-wrap:wrap}
+.now span:last-child{font-family:Cinzel,serif;font-size:clamp(22px,2.4vw,28px);color:#fff4dc;white-space:nowrap;margin-left:auto}
 .status{border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:16px;border:1px solid}
 .status.ok{border-color:#2f7d55;background:rgba(95,211,148,.08);color:var(--ok)}
 .status.wait{border-color:var(--gold2);background:rgba(212,173,90,.08);color:var(--gold)}
@@ -161,7 +162,7 @@ function render(d){
  ${d.pagado>0?`<div><span>Pagado</span><span style="color:var(--ok)">${money(d.pagado)}</span></div><div><span>Restante</span><span>${money(d.restante)}</span></div>`:""}
  </div>
  ${canPay?`<div class="now"><span>${d.pagado>0?"Restante a pagar":"A pagar hoy"}</span><span>${money(d.due)}</span></div>`:""}
- <div class="trust"><span>Los datos de tu tarjeta los captura Mercado Pago en su página segura. La Gitanilla nunca los ve ni los guarda.</span><span>¿Dudas? <a href="${wa(d.whatsapp,"Hola, tengo una duda sobre mi pedido folio "+d.folio)}">Escríbenos por WhatsApp</a>.</span></div>
+ <div class="trust">${d.pagoTarjeta?"<span>Los datos de tu tarjeta los captura Mercado Pago en su página segura. La Gitanilla nunca los ve ni los guarda.</span>":""}<span>¿Dudas? <a href="${wa(d.whatsapp,"Hola, tengo una duda sobre mi pedido folio "+d.folio)}">Escríbenos por WhatsApp</a>.</span></div>
  </aside></div>
  ${canPay?`<form id="f" novalidate><section class="card" aria-labelledby="t3"><h2 id="t3">${d.cliente?"Confirma tus datos de envío":"Tus datos de envío"}</h2>
  <p style="color:var(--soft);margin:-6px 0 14px;font-size:15px">Los campos con <span style="color:var(--gold)">*</span> son obligatorios.</p>
