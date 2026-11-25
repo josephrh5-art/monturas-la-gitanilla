@@ -152,7 +152,8 @@ async function boot(){
  <div class="fg">
  <label class="full" for="modelo">Montura<input id="modelo" list="ml" placeholder="Charra negra de cocodrilo"><datalist id="ml">${MODELOS.map(m=>`<option value="${esc(m)}">`).join("")}</datalist></label>
  <div class="full drop" id="drop"><img id="thumb" alt="" hidden><div><b style="color:var(--gold)">Foto de la montura</b><br><span>Arrastra la foto editada, pégala con Ctrl + V o <label for="file" class="lnk">elígela</label>.</span><input type="file" id="file" accept="image/*" hidden></div><button class="x" type="button" id="rmph" aria-label="Quitar foto" hidden>×</button></div>
- <div class="full"><p style="margin:4px 0;font-weight:700;font-size:14px">Especificaciones</p><div id="specs"></div><button class="b o" type="button" id="addsp" style="min-height:36px">+ Agregar dato</button></div>
+ <div class="full"><p style="margin:4px 0;font-weight:700;font-size:14px">Especificaciones <small style="font-weight:400;color:var(--soft)">las ve el cliente: escribe qué lleva, no precios</small></p><div id="specs"></div><button class="b o" type="button" id="addsp" style="min-height:36px">+ Agregar dato</button></div>
+ <div class="full" style="border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:4px"><p style="margin:0 0 6px;font-weight:700;font-size:14px;color:var(--gold)">Costos de esta montura <small style="font-weight:400;color:var(--soft)">privado: solo tú los ves, se guardan como gastos del pedido</small></p><div id="costs"></div><button class="b o" type="button" id="addco" style="min-height:36px">+ Agregar costo</button> <span id="cosum" style="margin-left:8px;color:var(--soft);font-size:14px"></span></div>
  </div>
  <div class="fg3" style="margin-top:12px">
  <label for="precio">Precio de la montura<input id="precio" inputmode="decimal" placeholder="45000"></label>
@@ -186,7 +187,12 @@ async function boot(){
 function setupForm(){
  const specs=$("specs");
  const add=(a="",b="")=>{const d=document.createElement("div");d.className="spec";d.innerHTML='<input aria-label="Dato" placeholder="Dato"><input aria-label="Valor" placeholder="Valor"><button class="x" type="button" aria-label="Quitar">×</button>';d.children[0].value=a;d.children[1].value=b;specs.append(d);};
- [["Piel",""],["Color",""],["Cabeza",""],["Grabado",""],["Asiento",""]].forEach(x=>add(...x));
+ [["Piel","Cocodrilo"],["Color","Negro"],["Cabeza","Chapeada en oro"],["Grabado","Monograma"],["Asiento","15 pulgadas"]].forEach(x=>{add(x[0],"");specs.lastChild.children[1].placeholder="Ej. "+x[1];});
+ const costs=$("costs");
+ const addC=(c="",cat="Otros")=>{const d=document.createElement("div");d.className="spec";d.style.gridTemplateColumns="minmax(0,1fr) minmax(0,.9fr) minmax(0,.7fr) 40px";d.innerHTML=`<input aria-label="Concepto" placeholder="Concepto"><select aria-label="Categoría">${CATS.map(x=>`<option>${x}</option>`).join("")}</select><input aria-label="Costo" inputmode="decimal" placeholder="$0"><button class="x" type="button" aria-label="Quitar">×</button>`;d.children[0].value=c;d.children[1].value=cat;costs.append(d);};
+ [["Piel","Pieles"],["Tinte y color","Hilos y materiales"],["Cabeza y herrajes","Herrajes y metal"],["Grabado","Grabado"],["Fuste y asiento","Fustes y madera"]].forEach(x=>addC(...x));
+ $("addco").addEventListener("click",()=>{addC();costs.lastChild.children[0].focus();});
+ costs.addEventListener("click",e=>{if(e.target.closest(".x")){e.target.closest(".spec").remove();calc();}});
  $("addsp").addEventListener("click",()=>{add();specs.lastChild.children[0].focus();});
  specs.addEventListener("click",e=>{if(e.target.closest(".x"))e.target.closest(".spec").remove();});
  const setPhoto=f=>{if(!f||!f.type.startsWith("image/"))return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const M=1000,s=Math.min(1,M/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);let u=c.toDataURL("image/webp",.78);if(!u.startsWith("data:image/webp"))u=c.toDataURL("image/jpeg",.8);photo=u;$("thumb").src=u;$("thumb").hidden=false;$("rmph").hidden=false;};im.src=r.result;};r.readAsDataURL(f);};
@@ -197,12 +203,12 @@ function setupForm(){
  drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("on");setPhoto(e.dataTransfer.files[0]);});
  document.addEventListener("paste",e=>{const it=[...((e.clipboardData||{}).items||[])].find(i=>i.type.startsWith("image/"));if(it)setPhoto(it.getAsFile());});
  $("rmph").addEventListener("click",()=>{photo="";$("thumb").hidden=true;$("rmph").hidden=true;$("file").value="";});
- const calc=()=>{const t=num($("precio").value)+num($("envio").value),a=+$("anticipo").value,h=a<100?Math.round(t*a)/100:t;$("hoy").textContent=money(h);$("tot").textContent=money(t);$("rest").textContent=money(t-h);};
+ const calc=()=>{const t=num($("precio").value)+num($("envio").value),a=+$("anticipo").value,h=a<100?Math.round(t*a)/100:t;$("hoy").textContent=money(h);$("tot").textContent=money(t);$("rest").textContent=money(t-h);const cs=[...$("costs").children].reduce((s,r)=>s+num(r.children[2].value),0);$("cosum").innerHTML=cs>0?`Costos ${money(cs)} · <b class="${t-cs>=0?"pos":"neg"}">Ganancia ${money(t-cs)}</b>`:"";};
  $("nf").addEventListener("input",calc);$("nf").addEventListener("change",calc);calc();
  $("nf").addEventListener("submit",async e=>{
   e.preventDefault();$("nst").textContent="";
   if(!(num($("precio").value)>0)){$("nst").textContent="Pon el precio de la montura.";$("precio").focus();return;}
-  const body={modelo:$("modelo").value,foto:photo||null,specs:[...$("specs").children].map(r=>[r.children[0].value,r.children[1].value]),precio:num($("precio").value),envio:num($("envio").value),anticipo:+$("anticipo").value,entrega:$("entrega").value,nota:$("nota").value,nombre:$("cnom").value,telefono:$("ctel").value};
+  const body={modelo:$("modelo").value,foto:photo||null,specs:[...$("specs").children].map(r=>[r.children[0].value,r.children[1].value]),costos:[...$("costs").children].map(r=>({concepto:r.children[0].value.trim(),categoria:r.children[1].value,monto:num(r.children[2].value)})).filter(c=>c.concepto&&c.monto>0),precio:num($("precio").value),envio:num($("envio").value),anticipo:+$("anticipo").value,entrega:$("entrega").value,nota:$("nota").value,nombre:$("cnom").value,telefono:$("ctel").value};
   $("crear").disabled=true;$("crear").textContent="Creando…";
   try{
    const j=await api("/api/admin/pedidos",{method:"POST",body:JSON.stringify(body)});
@@ -210,7 +216,7 @@ function setupForm(){
    const txt=`Hola${n?" "+n:""}, aquí está tu pedido de Monturas La Gitanilla (folio ${j.folio}). Llena tus datos de envío y paga de forma segura aquí:\n${j.link}`;
    $("made").innerHTML=`<div class="linkbox">${esc(j.link)}</div><div class="acts"><button class="b g" type="button" id="cpl">Copiar link</button><a class="b w" target="_blank" rel="noopener" href="${ph.length===10?"https://wa.me/52"+ph:"https://wa.me/"}?text=${encodeURIComponent(txt)}">Enviar por WhatsApp</a><a class="b o" target="_blank" rel="noopener" href="${esc(j.link)}">Ver como cliente</a></div>`;
    $("cpl").addEventListener("click",()=>copy(j.link,$("cpl")));
-   $("nst").textContent="Pedido "+j.folio+" creado.";load();
+   $("nst").textContent="Pedido "+j.folio+" creado.";for(const r of $("costs").children)r.children[2].value="";calc();C=null;load();
   }catch(err){$("nst").textContent=err.message;}
   $("crear").disabled=false;$("crear").textContent="Crear pedido y link";
  });
