@@ -251,6 +251,13 @@ const server = http.createServer(async (req, res) => {
         const folio = str(b.folio, 30) || `LG-${String(d.getFullYear()).slice(2)}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${code.slice(0, 4)}`;
         db.prepare(`INSERT INTO pedidos(code,folio,creado,actualizado,modelo,specs,precio,envio,anticipo,entrega,nota,foto,estado,nombre,telefono)
           VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'nuevo',?,?)`).run(code, folio, now(), now(), str(b.modelo, 120) || "Montura personalizada", JSON.stringify(specs), precio, envio, anticipo, str(b.entrega, 80), str(b.nota, 300), foto, str(b.nombre, 60), str(b.telefono, 20).replace(/[^\d+]/g, ""));
+        if (Array.isArray(b.costos)) {
+          const ins = db.prepare("INSERT INTO gastos(id,fecha,concepto,categoria,monto,metodo,code,nota,creado) VALUES(?,?,?,?,?,?,?,?,?)");
+          for (const c of b.costos.slice(0, 30)) {
+            const monto = money(c && c.monto); const concepto = str(c && c.concepto, 120);
+            if (monto > 0 && concepto) ins.run(crypto.randomUUID(), now().slice(0, 10), concepto, str(c.categoria, 40) || "Otros", monto, "", code, "Costo del pedido " + folio, now());
+          }
+        }
         return send(res, 201, { ok: true, code, folio, link: `${baseUrl(req)}/p/${code}` });
       }
       // ---- contabilidad ----
