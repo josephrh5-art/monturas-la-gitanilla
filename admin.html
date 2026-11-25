@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Pedidos · La Gitanilla</title>
@@ -22,7 +24,7 @@ h1,h2,h3{font-family:Cinzel,Georgia,serif;margin:0;line-height:1.1}
 button{font:inherit;color:inherit}
 header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px max(4vw,16px);border-bottom:1px solid var(--line)}
 header img{width:42px;height:42px}
-header h1{font-size:20px;color:var(--gold);margin-right:auto}
+header h1{font-size:20px;color:var(--gold)}
 main{max-width:1240px;margin:auto;padding:20px max(4vw,16px) 60px}
 .b{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 16px;border-radius:10px;border:0;font-weight:800;cursor:pointer;text-decoration:none;white-space:nowrap}
 .b.g{background:var(--gold);color:#1a1209}.b.w{background:var(--wa);color:#fff}.b.o{background:transparent;color:var(--gold);box-shadow:inset 0 0 0 2px var(--gold2)}.b.r{background:transparent;color:var(--bad);box-shadow:inset 0 0 0 1px #8a3b31}
@@ -81,6 +83,41 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .login img{width:90px;margin:0 auto 10px}
 .login form{display:grid;gap:10px;margin-top:14px}
 .login .err{color:var(--bad);min-height:1.4em;font-size:15px}
+.tabs{display:flex;gap:6px;margin-right:auto;margin-left:8px}
+.tab{min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:transparent;cursor:pointer;font-weight:700}
+.tab[aria-selected=true]{background:var(--gold);color:#1a1209;border-color:var(--gold)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0 20px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.kpi span{display:block;color:var(--soft);font-size:14px}
+.kpi b{display:block;font-family:Cinzel,serif;font-size:clamp(22px,2.6vw,30px);margin-top:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.kpi small{color:var(--soft);font-size:13px}
+.pos{color:var(--ok)}.neg{color:var(--bad)}
+.cgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-bottom:20px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.box h3{font-size:17px;color:var(--gold);margin-bottom:12px}
+.mrow{display:grid;grid-template-columns:70px minmax(0,1fr) 110px;gap:10px;align-items:center;font-size:14px;margin-bottom:8px}
+.mrow .bars{display:grid;gap:3px}
+.br{height:10px;border-radius:5px;min-width:2px}
+.br.i{background:var(--ok)}.br.g{background:var(--bad)}
+.mrow .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--soft);margin-bottom:10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.crow{display:grid;grid-template-columns:minmax(0,9em) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:14px;margin-bottom:8px}
+.crow .br{height:12px;background:var(--gold2)}
+.crow .v{white-space:nowrap;font-variant-numeric:tabular-nums}
+.forms{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;margin-bottom:20px}
+.forms form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.forms .st{grid-column:1/-1}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th{text-align:left;color:var(--soft);font-weight:500;font-size:13px;border-bottom:1px solid var(--line);padding:8px 6px}
+.tbl td{border-bottom:1px solid #1f1912;padding:8px 6px;vertical-align:top}
+.tbl td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.del{background:none;border:0;color:var(--soft);cursor:pointer;font-size:18px;min-width:32px;min-height:32px;padding:0 4px}
+.del:hover{color:var(--bad)}
+.scroll{overflow-x:auto}
+.cnote{font-size:13px;color:var(--soft);margin-top:16px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cgrid,.forms{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.tbl thead{display:none}.tbl tr{display:grid;grid-template-columns:minmax(0,1fr) auto;padding:8px 0;border-bottom:1px solid var(--line)}.tbl td{border:0;padding:2px 4px}.forms form{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:900px){.slip{grid-template-columns:minmax(0,1fr)}.res{position:static}.body{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:640px){.fg,.fg3{grid-template-columns:minmax(0,1fr)}.o>summary{grid-template-columns:48px minmax(0,1fr) auto}.o>summary .tagc,.o>summary .ci{display:none}}
 </style>
@@ -106,8 +143,8 @@ function showLogin(){
 }
 async function boot(){
  let st;try{st=await api("/api/admin/estado");}catch(e){return;}
- root.innerHTML=`<header><img src="${LOGO}" alt=""><h1>Pedidos La Gitanilla</h1><a class="b o" href="/api/admin/export.csv">Descargar Excel (CSV)</a><button class="b o" id="out" type="button">Salir</button></header>
- <main>
+ root.innerHTML=`<header><img src="${LOGO}" alt=""><h1>La Gitanilla</h1><nav class="tabs" role="tablist"><button class="tab" role="tab" type="button" data-t="ped" aria-selected="true">Pedidos</button><button class="tab" role="tab" type="button" data-t="con" aria-selected="false">Contabilidad</button></nav><a class="b o" href="/api/admin/export.csv">Excel de pedidos</a><button class="b o" id="out" type="button">Salir</button></header>
+ <main id="tped">
  <div class="warn">${!st.persistente?`<div class="bad">⚠ No hay volumen conectado en Railway: los pedidos se borran cada vez que actualizas la página. Conecta un volumen antes de usarlo con clientes.</div>`:""}${!st.mercadopago?`<div>Mercado Pago no está conectado: los clientes solo verán transferencia. Agrega MP_ACCESS_TOKEN en Railway.</div>`:""}${!st.banco?`<div>Sin datos bancarios: agrega BANK_NAME, BANK_HOLDER y BANK_CLABE en Railway para ofrecer transferencia.</div>`:""}</div>
  <form class="slip" id="nf" novalidate>
  <h2>Nuevo pedido</h2>
@@ -139,9 +176,10 @@ async function boot(){
  <div class="bar"><h2>Base de pedidos</h2><input id="q" type="search" placeholder="Buscar nombre, folio, ciudad…" aria-label="Buscar"><button class="b o" type="button" id="rf">Actualizar</button></div>
  <div class="chips" id="fc" role="group" aria-label="Filtrar por estado"></div>
  <div class="list" id="list"><p class="empty">Cargando…</p></div>
- </main>`;
+ </main><main id="tcon" hidden></main>`;
  $("out").addEventListener("click",async()=>{await api("/api/admin/logout",{method:"POST"}).catch(()=>{});showLogin();});
  setupForm();renderChips();load();
+ document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("[data-t]");if(!b)return;for(const t of document.querySelectorAll(".tab"))t.setAttribute("aria-selected",String(t===b));$("tped").hidden=b.dataset.t!=="ped";$("tcon").hidden=b.dataset.t!=="con";if(b.dataset.t==="con")loadConta();});
  $("rf").addEventListener("click",load);
  $("q").addEventListener("input",e=>{q=e.target.value.toLowerCase();renderList();});
 }
@@ -183,7 +221,7 @@ function renderChips(){
  $("fc").innerHTML=all.map(([k,l])=>`<button class="chip" type="button" data-k="${k}" aria-pressed="${k===filt}">${l}</button>`).join("");
  $("fc").onclick=e=>{const b=e.target.closest("[data-k]");if(!b)return;filt=b.dataset.k;renderChips();renderList();};
 }
-async function load(){try{orders=await api("/api/admin/pedidos");renderList();}catch(e){$("list").innerHTML=`<p class="empty">${esc(e.message)}</p>`;}}
+async function load(){try{orders=await api("/api/admin/pedidos");window.orders=orders;renderList();}catch(e){$("list").innerHTML=`<p class="empty">${esc(e.message)}</p>`;}}
 function renderList(){
  const L=orders.filter(o=>(filt==="all"||(filt==="pend"?["nuevo","datos"].includes(o.estado):o.estado===filt))&&(!q||[o.folio,o.nombre,o.apellido,o.ciudad,o.modelo,o.telefono].join(" ").toLowerCase().includes(q)));
  if(!L.length){$("list").innerHTML=`<p class="empty">${orders.length?"Ningún pedido con ese filtro.":"Todavía no hay pedidos. Crea el primero arriba."}</p>`;return;}
@@ -198,8 +236,8 @@ function renderList(){
  <div><h3>Cliente y envío</h3>${o.datos_en?`<p><b style="color:var(--ink)">${esc(o.nombre)} ${esc(o.apellido)}</b><br>Tel. ${esc(o.telefono)}${o.email?"<br>"+esc(o.email):""}<br>${esc(o.calle)}, Col. ${esc(o.colonia)}<br>C.P. ${esc(o.cp)}, ${esc(o.ciudad)}, ${esc(o.estado_dir)}, ${esc(o.pais)}<br>Ref.: ${esc(o.referencias)}</p>`:`<p>El cliente aún no llena sus datos.</p>`}
  <h3>Link del cliente</h3><p style="overflow-wrap:anywhere">${base}${o.code}</p><div class="acts"><button class="b o" type="button" data-a="copy">Copiar</button>${o.telefono?`<a class="b w" target="_blank" rel="noopener" href="https://wa.me/${o.telefono.replace(/\D/g,"").length===10?"52":""}${o.telefono.replace(/\D/g,"")}">WhatsApp</a>`:""}</div></div>
  <div><h3>Montura</h3><ul>${o.specs.map(s=>`<li>${esc(s[0])}: ${esc(s[1])}</li>`).join("")||"<li>Sin especificaciones</li>"}</ul>${o.entrega?`<p style="margin-top:6px">Entrega: ${esc(o.entrega)}</p>`:""}
- <h3>Dinero</h3><p>Total ${money(o.total)} · Anticipo ${o.anticipoPct>0&&o.anticipoPct<100?o.anticipoPct+"% = "+money(o.anticipo):"pago completo"}<br>Pagado ${money(o.pagado)} · Restante ${money(o.restante)}${o.cobrar_restante?"<br><b style='color:var(--amb)'>Cobro del restante habilitado</b>":""}</p>
- ${o.pagos.length?`<ul style="margin-top:6px">${o.pagos.map(p=>`<li>${new Date(p.fecha).toLocaleDateString("es-MX")} · ${money(p.monto)} · ${esc(p.metodo)} · ${esc(({approved:"aprobado",pending:"pendiente",in_process:"en proceso",rejected:"rechazado",refunded:"devuelto",cancelled:"cancelado",charged_back:"contracargo"})[p.estado]||p.estado)}</li>`).join("")}</ul>`:""}</div>
+ <h3>Dinero</h3><p>${o.costos>0?`Costos asignados ${money(o.costos)} · <b class="${o.total-o.costos>=0?"pos":"neg"}">Utilidad ${money(o.total-o.costos)}</b><br>`:""}Total ${money(o.total)} · Anticipo ${o.anticipoPct>0&&o.anticipoPct<100?o.anticipoPct+"% = "+money(o.anticipo):"pago completo"}<br>Pagado ${money(o.pagado)} · Restante ${money(o.restante)}${o.cobrar_restante?"<br><b style='color:var(--amb)'>Cobro del restante habilitado</b>":""}</p>
+ ${o.pagos.length?`<ul style="margin-top:6px">${o.pagos.map(p=>`<li>${p.id.startsWith("manual-")?`<button class="del" type="button" data-delpago="${p.id}" title="Borrar este pago" aria-label="Borrar este pago">×</button>`:""}${new Date(p.fecha).toLocaleDateString("es-MX")} · ${money(p.monto)} · ${esc(p.metodo)} · ${esc(({approved:"aprobado",pending:"pendiente",in_process:"en proceso",rejected:"rechazado",refunded:"devuelto",cancelled:"cancelado",charged_back:"contracargo"})[p.estado]||p.estado)}</li>`).join("")}</ul>`:""}</div>
  <div><h3>Acciones</h3><div class="acts">
  <button class="b o" type="button" data-a="manual">Registrar pago recibido</button>
  ${o.pagado>0&&o.restante>0.01&&!o.cobrar_restante?`<button class="b o" type="button" data-a="cobrar_restante">Cobrar restante por el link</button>`:""}
@@ -208,6 +246,7 @@ function renderList(){
  <p style="margin-top:10px;font-size:13px">Creado ${new Date(o.creado).toLocaleString("es-MX")}${o.datos_en?" · datos "+new Date(o.datos_en).toLocaleString("es-MX"):""}</p></div>
  </div></details>`).join("");
  $("list").onclick=async e=>{
+  const dp=e.target.closest("[data-delpago]");if(dp){if(dp.dataset.sure!=="1"){dp.dataset.sure="1";dp.textContent="¿Borrar?";return;}const code=dp.closest("[data-c]").dataset.c;try{await api("/api/admin/pagos/"+dp.dataset.delpago,{method:"DELETE"});await load();openRow(code);}catch(err){dp.textContent="!";}return;}
   const b=e.target.closest("[data-a]");if(!b)return;const code=b.closest("[data-c]").dataset.c,a=b.dataset.a;
   if(a==="copy")return copy(base+code,b);
   let body={accion:a};
@@ -220,6 +259,77 @@ function renderList(){
   if(a==="cancelado"&&b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="¿Seguro? Toca otra vez";return;}
   try{await api("/api/admin/pedidos/"+code,{method:"PATCH",body:JSON.stringify(body)});await load();openRow(code);}catch(err){b.textContent=err.message;}
  };
+}
+/* ---------- contabilidad ---------- */
+const CATS=["Pieles","Herrajes y metal","Grabado","Fustes y madera","Hilos y materiales","Mano de obra","Envíos y paquetería","Publicidad","Renta y servicios","Herramientas","Comisiones bancarias","Otros"];
+const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+let C=null,per="";
+const ymd=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const ym=f=>String(f).slice(0,7);
+const yl=k=>{const [y,m]=k.split("-");return MES[+m-1]+" "+y.slice(2);};
+async function loadConta(){
+ const t=$("tcon");if(!C)t.innerHTML='<p class="empty">Cargando…</p>';
+ try{C=await api("/api/admin/conta");}catch(e){t.innerHTML=`<p class="empty">${esc(e.message)}</p>`;return;}
+ if(!per)per=ymd().slice(0,7);
+ renderConta();
+}
+function movs(){
+ return [...C.pagos.map(p=>({t:"i",id:p.id,f:p.fecha,c:"Pago pedido "+(p.folio||"")+(p.nombre?" · "+p.nombre+" "+(p.apellido||""):""),cat:"Pedidos",m:p.monto,met:p.metodo,del:p.id.startsWith("manual-")?"pago":""})),
+ ...C.otros.map(o=>({t:"i",id:o.id,f:o.fecha,c:o.concepto,cat:o.categoria,m:o.monto,met:o.metodo,del:"otros-ingresos"})),
+ ...C.gastos.map(g=>({t:"g",id:g.id,f:g.fecha,c:g.concepto+(g.folio?" · "+g.folio:""),cat:g.categoria,m:g.monto,met:g.metodo,del:"gastos"}))].sort((a,b)=>String(b.f).localeCompare(String(a.f)));
+}
+function renderConta(){
+ const all=movs();
+ const inP=m=>per==="todo"?true:per.length===4?String(m.f).startsWith(per):ym(m.f)===per;
+ const L=all.filter(inP);
+ const ing=L.filter(m=>m.t==="i").reduce((s,m)=>s+m.m,0),gas=L.filter(m=>m.t==="g").reduce((s,m)=>s+m.m,0),ut=ing-gas;
+ const pc=C.porCobrar.reduce((s,o)=>s+o.restante,0);
+ const months=new Set([ymd().slice(0,7),...all.map(m=>ym(m.f))]);const years=new Set([...months].map(k=>k.slice(0,4)));
+ const opts=[...[...months].sort().reverse().map(k=>[k,yl(k).replace(/^\w/,c=>c.toUpperCase())]),...[...years].sort().reverse().map(y=>[y,"Todo "+y]),["todo","Todo el historial"]];
+ // last 6 months
+ const now=new Date(),six=[];for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);six.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
+ const sm=six.map(k=>({k,i:all.filter(m=>m.t==="i"&&ym(m.f)===k).reduce((s,m)=>s+m.m,0),g:all.filter(m=>m.t==="g"&&ym(m.f)===k).reduce((s,m)=>s+m.m,0)}));
+ const mx=Math.max(1,...sm.map(x=>Math.max(x.i,x.g)));
+ const bc={};for(const m of L.filter(m=>m.t==="g"))bc[m.cat]=(bc[m.cat]||0)+m.m;
+ const cats=Object.entries(bc).sort((a,b)=>b[1]-a[1]);const cm=Math.max(1,...cats.map(c=>c[1]));
+ const orders=(window.orders||[]);
+ $("tcon").innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><h2 style="font-size:22px;color:var(--gold);margin-right:auto">Contabilidad</h2>
+ <label for="per" style="display:flex;align-items:center;gap:8px">Periodo<select id="per" style="width:auto">${opts.map(o=>`<option value="${o[0]}" ${o[0]===per?"selected":""}>${o[1]}</option>`).join("")}</select></label>
+ <a class="b o" href="/api/admin/conta.csv">Excel de movimientos</a></div>
+ <div class="kpis">
+ <div class="kpi"><span>Ingresos</span><b class="pos">${money(ing)}</b><small>${L.filter(m=>m.t==="i").length} movimientos</small></div>
+ <div class="kpi"><span>Gastos</span><b class="neg">${money(gas)}</b><small>${L.filter(m=>m.t==="g").length} movimientos</small></div>
+ <div class="kpi"><span>Utilidad</span><b class="${ut>=0?"pos":"neg"}">${money(ut)}</b><small>${ing>0?Math.round(ut/ing*100)+"% de lo que entró":"ingresos menos gastos"}</small></div>
+ <div class="kpi"><span>Por cobrar</span><b style="color:var(--amb)">${money(pc)}</b><small>${C.porCobrar.length} ${C.porCobrar.length===1?"pedido":"pedidos"} con saldo pendiente</small></div></div>
+ <div class="forms">
+ <div class="box"><h3>Registrar gasto</h3><form id="fg" novalidate>
+ <label for="gc" class="full" style="grid-column:1/-1">Concepto<input id="gc" placeholder="Piel de cocodrilo negro, 2 m²"></label>
+ <label for="gcat">Categoría<select id="gcat">${CATS.map(c=>`<option>${c}</option>`).join("")}</select></label>
+ <label for="gm">Monto<input id="gm" inputmode="decimal" placeholder="8500"></label>
+ <label for="gf">Fecha<input id="gf" type="date" value="${ymd()}"></label>
+ <label for="gmet">Pagado con<select id="gmet"><option>Transferencia</option><option>Efectivo</option><option>Tarjeta</option><option>Otro</option></select></label>
+ <label for="gp" style="grid-column:1/-1">Pedido <small>opcional: para saber cuánto ganas en cada montura</small><select id="gp"><option value="">General del taller</option>${orders.filter(o=>o.estado!=="cancelado").map(o=>`<option value="${o.code}">${esc(o.folio)} · ${esc(o.nombre||o.modelo)}</option>`).join("")}</select></label>
+ <button class="b g" type="submit" style="grid-column:1/-1">Guardar gasto</button><p class="st" id="gst"></p></form></div>
+ <div class="box"><h3>Otro ingreso</h3><p style="color:var(--soft);font-size:14px;margin:-6px 0 10px">Ventas que no son pedidos del sistema: accesorios, reparaciones, ventas en el taller. Los pagos de pedidos se suman solos.</p><form id="fi" novalidate>
+ <label for="ic" style="grid-column:1/-1">Concepto<input id="ic" placeholder="Reparación de montura"></label>
+ <label for="im">Monto<input id="im" inputmode="decimal" placeholder="1200"></label>
+ <label for="if">Fecha<input id="if" type="date" value="${ymd()}"></label>
+ <label for="imet" style="grid-column:1/-1">Cobrado con<select id="imet"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Otro</option></select></label>
+ <button class="b g" type="submit" style="grid-column:1/-1">Guardar ingreso</button><p class="st" id="ist"></p></form></div></div>
+ <div class="cgrid">
+ <div class="box"><h3>Últimos 6 meses</h3><div class="legend"><span><i style="background:var(--ok)"></i>Ingresos</span><span><i style="background:var(--bad)"></i>Gastos</span></div>
+ ${sm.map(x=>`<div class="mrow"><span>${yl(x.k)}</span><div class="bars"><div class="br i" style="width:${x.i/mx*100}%"></div><div class="br g" style="width:${x.g/mx*100}%"></div></div><span class="v ${x.i-x.g>=0?"pos":"neg"}">${money(x.i-x.g)}</span></div>`).join("")}</div>
+ <div class="box"><h3>Gastos por categoría</h3>${cats.length?cats.map(c=>`<div class="crow"><span>${esc(c[0])}</span><div class="br" style="width:${c[1]/cm*100}%"></div><span class="v">${money(c[1])}</span></div>`).join(""):'<p style="color:var(--soft)">Sin gastos en este periodo.</p>'}</div></div>
+ <div class="box"><h3>Movimientos</h3>${L.length?`<div class="scroll"><table class="tbl"><thead><tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th>Método</th><th style="text-align:right">Monto</th><th></th></tr></thead><tbody>
+ ${L.map(m=>`<tr><td>${new Date(String(m.f).length===10?m.f+"T12:00":m.f).toLocaleDateString("es-MX")}</td><td>${esc(m.c)}</td><td>${esc(m.cat)}</td><td>${esc(m.met||"")}</td><td class="n ${m.t==="i"?"pos":"neg"}">${m.t==="i"?"+":"−"}${money(m.m)}</td><td>${m.del?`<button class="del" type="button" data-del="${m.del}" data-id="${m.id}" aria-label="Borrar movimiento" title="Borrar">×</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:'<p style="color:var(--soft)">No hay movimientos en este periodo.</p>'}</div>
+ ${C.porCobrar.length?`<div class="box" style="margin-top:16px"><h3>Por cobrar</h3><div class="scroll"><table class="tbl"><thead><tr><th>Folio</th><th>Cliente</th><th>Estado</th><th style="text-align:right">Pagado</th><th style="text-align:right">Falta</th></tr></thead><tbody>${C.porCobrar.map(o=>`<tr><td>${esc(o.folio)}</td><td>${esc(o.nombre?o.nombre+" "+(o.apellido||""):o.modelo)}</td><td>${EST[o.estado]||o.estado}</td><td class="n">${money(o.pagado)}</td><td class="n" style="color:var(--amb)">${money(o.restante)}</td></tr>`).join("")}</tbody></table></div></div>`:""}
+ <p class="cnote">Este es un control interno de ingresos y gastos. Para impuestos y facturación, comparte el Excel con tu contador.</p>`;
+ $("per").addEventListener("change",e=>{per=e.target.value;renderConta();});
+ $("fg").addEventListener("submit",async e=>{e.preventDefault();try{await api("/api/admin/gastos",{method:"POST",body:JSON.stringify({concepto:$("gc").value,categoria:$("gcat").value,monto:num($("gm").value),fecha:$("gf").value,metodo:$("gmet").value,code:$("gp").value})});await loadConta();await load();$("gst").textContent="Gasto guardado.";}catch(err){$("gst").textContent=err.message;}});
+ $("fi").addEventListener("submit",async e=>{e.preventDefault();try{await api("/api/admin/otros-ingresos",{method:"POST",body:JSON.stringify({concepto:$("ic").value,monto:num($("im").value),fecha:$("if").value,metodo:$("imet").value})});await loadConta();$("ist").textContent="Ingreso guardado.";}catch(err){$("ist").textContent=err.message;}});
+ $("tcon").querySelector(".tbl")?.addEventListener("click",async e=>{const b=e.target.closest("[data-del]");if(!b)return;if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="¿Borrar?";return;}
+  const u=b.dataset.del==="pago"?"/api/admin/pagos/"+b.dataset.id:"/api/admin/"+b.dataset.del+"/"+b.dataset.id;
+  try{await api(u,{method:"DELETE"});await loadConta();if(b.dataset.del==="pago")await load();}catch(err){b.textContent="!";}});
 }
 function openRow(code){const d=document.querySelector(`[data-c="${code}"]`);if(d)d.open=true;}
 fetch("/api/admin/estado",{credentials:"same-origin"}).then(r=>r.ok?boot():showLogin()).catch(showLogin);
