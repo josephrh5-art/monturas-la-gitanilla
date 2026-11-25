@@ -26,6 +26,10 @@ CREATE TABLE IF NOT EXISTS pedidos(
   foto TEXT, estado TEXT, pagado REAL DEFAULT 0, cobrar_restante INTEGER DEFAULT 0,
   nombre TEXT, apellido TEXT, telefono TEXT, email TEXT, calle TEXT, colonia TEXT, cp TEXT,
   ciudad TEXT, estado_dir TEXT, pais TEXT, referencias TEXT, datos_en TEXT);
+CREATE TABLE IF NOT EXISTS gastos(
+  id TEXT PRIMARY KEY, fecha TEXT, concepto TEXT, categoria TEXT, monto REAL, metodo TEXT, code TEXT, nota TEXT, creado TEXT);
+CREATE TABLE IF NOT EXISTS otros_ingresos(
+  id TEXT PRIMARY KEY, fecha TEXT, concepto TEXT, categoria TEXT, monto REAL, metodo TEXT, creado TEXT);
 CREATE TABLE IF NOT EXISTS pagos(
   id TEXT PRIMARY KEY, code TEXT, monto REAL, metodo TEXT, estado TEXT, fecha TEXT);`);
 
@@ -134,7 +138,7 @@ const LABEL = { nombre: "nombre", apellido: "apellidos", telefono: "teléfono", 
 const REQ = { nombre: 60, apellido: 80, telefono: 20, calle: 150, colonia: 100, cp: 10, ciudad: 80, estado: 60, pais: 40, referencias: 300 };
 
 // ---------- archivos estáticos ----------
-const STATIC = { "/": "index.html", "/index.html": "index.html", "/pago.html": "pago.html", "/compartir.jpg": "compartir.jpg", "/admin": "admin.html", "/admin.html": "admin.html" };
+const STATIC = { "/": "index.html", "/index.html": "index.html", "/pago.html": "pago.html", "/compartir.jpg": "compartir.jpg", "/favicon.png": "favicon.png", "/favicon.ico": "favicon.png", "/admin": "admin.html", "/admin.html": "admin.html" };
 const TYPES = { ".html": "text/html; charset=utf-8", ".jpg": "image/jpeg", ".png": "image/png", ".mp4": "video/mp4", ".webp": "image/webp" };
 function serveFile(req, res, file, cache = "public, max-age=300") {
   const fp = path.join(ROOT, file);
@@ -234,7 +238,7 @@ const server = http.createServer(async (req, res) => {
       if (M === "GET" && p === "/api/admin/estado") return send(res, 200, { persistente: PERSISTENT, mercadopago: Boolean(MP_TOKEN), banco: BANK.clabe.length === 18 });
       if (M === "GET" && p === "/api/admin/pedidos") {
         const rows = db.prepare("SELECT * FROM pedidos ORDER BY creado DESC").all();
-        return send(res, 200, rows.map((o) => ({ ...o, foto: Boolean(o.foto), specs: JSON.parse(o.specs || "[]"), ...totals(o), anticipoPct: o.anticipo, pagos: db.prepare("SELECT * FROM pagos WHERE code=? ORDER BY fecha").all(o.code) })));
+        return send(res, 200, rows.map((o) => ({ ...o, foto: Boolean(o.foto), specs: JSON.parse(o.specs || "[]"), ...totals(o), anticipoPct: o.anticipo, costos: money((db.prepare("SELECT SUM(monto) s FROM gastos WHERE code=?").get(o.code) || {}).s || 0), pagos: db.prepare("SELECT * FROM pagos WHERE code=? ORDER BY fecha").all(o.code) })));
       }
       if (M === "POST" && p === "/api/admin/pedidos") {
         const b = await readBody(req, 1_500_000);
@@ -248,6 +252,58 @@ const server = http.createServer(async (req, res) => {
         db.prepare(`INSERT INTO pedidos(code,folio,creado,actualizado,modelo,specs,precio,envio,anticipo,entrega,nota,foto,estado,nombre,telefono)
           VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'nuevo',?,?)`).run(code, folio, now(), now(), str(b.modelo, 120) || "Montura personalizada", JSON.stringify(specs), precio, envio, anticipo, str(b.entrega, 80), str(b.nota, 300), foto, str(b.nombre, 60), str(b.telefono, 20).replace(/[^\d+]/g, ""));
         return send(res, 201, { ok: true, code, folio, link: `${baseUrl(req)}/p/${code}` });
+      }
+      // ---- contabilidad ----
+      if (M === "GET" && p === "/api/admin/conta") {
+        return send(res, 200, {
+          pagos: db.prepare("SELECT p.id,p.code,p.monto,p.metodo,p.estado,p.fecha,o.folio,o.modelo,o.nombre,o.apellido FROM pagos p LEFT JOIN pedidos o ON o.code=p.code WHERE p.estado='approved' ORDER BY p.fecha DESC").all(),
+          otros: db.prepare("SELECT * FROM otros_ingresos ORDER BY fecha DESC").all(),
+          gastos: db.prepare("SELECT g.*, o.folio FROM gastos g LEFT JOIN pedidos o ON o.code=g.code ORDER BY g.fecha DESC").all(),
+          porCobrar: db.prepare("SELECT code,folio,modelo,nombre,apellido,precio,envio,pagado,estado FROM pedidos WHERE estado NOT IN ('cancelado')").all().map((o) => ({ ...o, restante: money(o.precio + o.envio - o.pagado) })).filter((o) => o.restante > 0.009),
+        });
+      }
+      const fechaOk = (f) => (/^\d{4}-\d{2}-\d{2}$/.test(String(f)) ? String(f) : now().slice(0, 10));
+      if (M === "POST" && p === "/api/admin/gastos") {
+        const b = await readBody(req, 10_000);
+        const monto = money(b.monto); if (!(monto > 0)) return send(res, 400, { error: "Pon el monto del gasto." });
+        const concepto = str(b.concepto, 120); if (!concepto) return send(res, 400, { error: "Pon el concepto del gasto." });
+        const code = b.code && getOrder(String(b.code)) ? String(b.code) : null;
+        db.prepare("INSERT INTO gastos(id,fecha,concepto,categoria,monto,metodo,code,nota,creado) VALUES(?,?,?,?,?,?,?,?,?)").run(crypto.randomUUID(), fechaOk(b.fecha), concepto, str(b.categoria, 40) || "Otros", monto, str(b.metodo, 40), code, str(b.nota, 200), now());
+        return send(res, 201, { ok: true });
+      }
+      if (M === "POST" && p === "/api/admin/otros-ingresos") {
+        const b = await readBody(req, 10_000);
+        const monto = money(b.monto); if (!(monto > 0)) return send(res, 400, { error: "Pon el monto del ingreso." });
+        const concepto = str(b.concepto, 120); if (!concepto) return send(res, 400, { error: "Pon el concepto del ingreso." });
+        db.prepare("INSERT INTO otros_ingresos(id,fecha,concepto,categoria,monto,metodo,creado) VALUES(?,?,?,?,?,?,?)").run(crypto.randomUUID(), fechaOk(b.fecha), concepto, str(b.categoria, 40) || "Otros ingresos", monto, str(b.metodo, 40), now());
+        return send(res, 201, { ok: true });
+      }
+      if (M === "DELETE" && (m = /^\/api\/admin\/(gastos|otros-ingresos)\/([0-9a-f-]{36})$/.exec(p))) {
+        db.prepare(`DELETE FROM ${m[1] === "gastos" ? "gastos" : "otros_ingresos"} WHERE id=?`).run(m[2]);
+        return send(res, 200, { ok: true });
+      }
+      if (M === "DELETE" && (m = /^\/api\/admin\/pagos\/(manual-[0-9a-f-]{36})$/.exec(p))) {
+        const pg = db.prepare("SELECT * FROM pagos WHERE id=?").get(m[1]); if (!pg) return send(res, 404, { error: "No existe" });
+        db.prepare("DELETE FROM pagos WHERE id=?").run(pg.id);
+        const o = getOrder(pg.code);
+        if (o && pg.estado === "approved") {
+          const pagado = money(Math.max(0, o.pagado - pg.monto));
+          const t = totals({ ...o, pagado });
+          const est = ["en_taller", "enviado", "entregado", "cancelado"].includes(o.estado) ? o.estado : pagado < 0.01 ? (o.datos_en ? "datos" : "nuevo") : t.restante < 0.01 ? "pagado" : "anticipo";
+          db.prepare("UPDATE pedidos SET pagado=?, estado=?, actualizado=? WHERE code=?").run(pagado, est, now(), o.code);
+        }
+        return send(res, 200, { ok: true });
+      }
+      if (M === "GET" && p === "/api/admin/conta.csv") {
+        const rows = [
+          ...db.prepare("SELECT p.fecha,'Ingreso' tipo,'Pedido' categoria,('Pago folio '||IFNULL(o.folio,'')||' '||IFNULL(o.nombre,'')||' '||IFNULL(o.apellido,'')) concepto,p.monto,p.metodo,IFNULL(o.folio,'') folio FROM pagos p LEFT JOIN pedidos o ON o.code=p.code WHERE p.estado='approved'").all(),
+          ...db.prepare("SELECT fecha,'Ingreso' tipo,categoria,concepto,monto,metodo,'' folio FROM otros_ingresos").all(),
+          ...db.prepare("SELECT g.fecha,'Gasto' tipo,g.categoria,g.concepto,-g.monto monto,g.metodo,IFNULL(o.folio,'') folio FROM gastos g LEFT JOIN pedidos o ON o.code=g.code").all(),
+        ].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
+        const cols = ["fecha", "tipo", "categoria", "concepto", "monto", "metodo", "folio"];
+        const q = (v) => { let x = String(v ?? ""); if (/^[=+\-@]/.test(x) && isNaN(Number(x))) x = "'" + x; return '"' + x.replace(/"/g, '""') + '"'; };
+        const csv = "﻿" + [cols.join(","), ...rows.map((r) => cols.map((c) => q(c === "fecha" ? String(r.fecha).slice(0, 10) : r[c])).join(","))].join("\r\n");
+        return send(res, 200, csv, "text/csv; charset=utf-8", { "Content-Disposition": 'attachment; filename="contabilidad-la-gitanilla.csv"' });
       }
       if (M === "GET" && p === "/api/admin/export.csv") {
         const rows = db.prepare("SELECT * FROM pedidos ORDER BY creado DESC").all();
