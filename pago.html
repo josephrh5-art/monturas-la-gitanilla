@@ -4,7 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Pagar pedido · La Gitanilla</title>
+<title>Tu pedido · Monturas La Gitanilla</title>
+<meta name="description" content="Revisa los detalles de tu montura y paga de forma segura con tarjeta, OXXO o transferencia.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Monturas La Gitanilla">
+<meta property="og:title" content="Tu pedido · Monturas La Gitanilla">
+<meta property="og:description" content="Revisa los detalles de tu montura y paga de forma segura con tarjeta, OXXO o transferencia.">
+<meta property="og:url" content="https://monturas-la-gitanilla-production.up.railway.app/pago.html">
+<meta property="og:image" content="https://monturas-la-gitanilla-production.up.railway.app/compartir.jpg">
+<meta property="og:image:secure_url" content="https://monturas-la-gitanilla-production.up.railway.app/compartir.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://monturas-la-gitanilla-production.up.railway.app/compartir.jpg">
+<link rel="icon" href="https://monturas-la-gitanilla-production.up.railway.app/compartir.jpg">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Alegreya+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -98,11 +113,13 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const money=n=>"$"+Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2})+" MXN";
 const wa=m=>"https://wa.me/"+TEL+"?text="+encodeURIComponent(m);
 for(const im of document.querySelectorAll("img[data-p]"))im.src=P[im.dataset.p];
+const inflate=async s=>{try{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=Uint8Array.from(atob(s),c=>c.charCodeAt(0));const st=new Blob([b]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return JSON.parse(await new Response(st).text());}catch(e){return null;}};
 const decode=s=>{try{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s);const u=new Uint8Array([...b].map(c=>c.charCodeAt(0)));return JSON.parse(new TextDecoder().decode(u));}catch(e){return null;}};
 const safeLink=u=>{try{const x=new URL(u);return x.protocol==="https:"&&OK_HOSTS.includes(x.hostname)?x.href:null;}catch(e){return null;}};
 const provider=u=>{const h=new URL(u).hostname;return h.includes("stripe")?"Stripe":h.includes("paypal")?"PayPal":h.includes("clip")?"Clip":"Mercado Pago";};
 const raw=(location.hash.match(/p=([^&]+)/)||location.search.match(/p=([^&]+)/)||[])[1];
-const d=raw?decode(raw):null;
+(async()=>{
+const d=!raw?null:raw[0]==="z"?await inflate(raw.slice(1)):decode(raw);
 const app=$("#app");
 if(!d){
 app.innerHTML=`<div class="empty"><img src="${P.logo}" alt=""><h1>Paga tu pedido</h1><p>Para pagar necesitas el link de tu pedido. Si ya tienes tu cotización, pídelo por WhatsApp y te lo mandamos.</p><a class="btn pay-b" href="${wa("Hola, ya tengo mi cotización y quiero mi link de pago.")}">Pedir mi link de pago</a></div>`;
@@ -111,6 +128,7 @@ const total=(+d.pr||0)+(+d.en||0);
 const now=d.an?Math.round(total*(+d.an)/100*100)/100:total;
 const link=d.lk?safeLink(d.lk):null;
 const m=MODELS[d.mo]||MODELS.custom;
+const ph=typeof d.im==="string"&&/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(d.im)&&d.im.length<120000?d.im:(typeof d.ph==="string"&&/^[A-Za-z0-9._-]+\.(jpe?g|png|webp)$/i.test(d.ph)?d.ph:null);
 const specs=(d.sp||[]).filter(x=>x&&x[0]);
 const methods=[];
 if(link)methods.push({id:"card",t:"Tarjeta de crédito o débito",s:`Pago seguro con ${provider(link)}${d.ms?` · hasta ${esc(d.ms)} meses sin intereses`:""}`,l:["VISA","Mastercard","AMEX"]});
@@ -119,7 +137,7 @@ if(d.cl)methods.push({id:"spei",t:"Transferencia bancaria (SPEI)",s:"Transfiere 
 app.innerHTML=`<div class="top"><h1>Hola${d.cn?", "+esc(d.cn.split(" ")[0]):""}. Este es tu pedido</h1><p>Revisa que todo esté correcto antes de pagar.${d.fl?` Fecha límite de pago: <b>${esc(d.fl)}</b>.`:""}</p></div>
 <div class="grid">
 <section class="card" aria-labelledby="t1"><h2 id="t1">Tu montura</h2>
-<div class="prod"><img src="${P[m.i]}" alt="${esc(m.n)}"><div><h3>${esc(d.mn||m.n)}</h3>${d.fo?`<span class="folio">Folio ${esc(d.fo)}</span>`:""}
+<div class="prod"><img src="${ph?ph:P[m.i]}" alt="${esc(d.mn||m.n)}" onerror="this.onerror=null;this.src='${P[m.i]}'"><div><h3>${esc(d.mn||m.n)}</h3>${d.fo?`<span class="folio">Folio ${esc(d.fo)}</span>`:""}
 ${specs.length?`<dl>${specs.map(x=>`<dt>${esc(x[0])}</dt><dd>${esc(x[1])}</dd>`).join("")}</dl>`:""}</div></div>
 <div class="cli"><b>${esc(d.cn||"")}</b>${d.ci?` · Envío a ${esc(d.ci)}`:""}${d.te?`<br>Entrega estimada: ${esc(d.te)}`:""}</div>
 </section>
@@ -154,6 +172,7 @@ payb.addEventListener("click",()=>{if(sel()!=="spei")setTimeout(()=>{msg.textCon
 const cpc=$("#cpc");if(cpc)cpc.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(d.cl);cpc.textContent="Copiada";}catch(e){cpc.textContent="Selecciónala";}});
 upd();
 }
+})();
 }
 </script>
 </body>
