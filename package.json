@@ -1,0 +1,13 @@
+{
+  "name": "monturas-la-gitanilla",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Página, pedidos y pagos de Monturas La Gitanilla",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --no-warnings server.js"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
