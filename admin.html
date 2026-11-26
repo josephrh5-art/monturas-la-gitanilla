@@ -116,6 +116,25 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .del:hover{color:var(--bad)}
 .scroll{overflow-x:auto}
 .cnote{font-size:13px;color:var(--soft);margin-top:16px}
+dialog.dlg{background:var(--panel);color:var(--ink);border:1px solid var(--gold2);border-radius:16px;padding:20px;width:min(520px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto}
+dialog.dlg::backdrop{background:rgba(0,0,0,.7)}
+dialog.dlg h3{color:var(--gold);font-size:19px;margin-bottom:12px}
+dialog.dlg form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+dialog.dlg .w{grid-column:1/-1}
+dialog.dlg .acts{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+dialog.dlg .err{grid-column:1/-1;color:var(--bad);font-size:14px;min-height:1.2em}
+.ed{background:none;border:0;color:var(--soft);cursor:pointer;font-size:16px;min-width:32px;min-height:32px;padding:0 4px}
+.ed:hover{color:var(--gold)}
+.mini{display:flex;align-items:center;gap:2px;font-size:14px;color:var(--soft)}
+.mini span{flex:1}
+.nlist{display:grid;gap:8px;margin-top:8px}
+.nota{background:#0b0906;border:1px solid var(--line);border-left:3px solid var(--gold2);border-radius:10px;padding:8px 10px;font-size:15px}
+.nota p{margin:0;white-space:pre-wrap;color:var(--ink)}
+.nota .nm{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--soft);margin-top:4px}
+.nota .nm span{flex:1}
+.nadd{display:grid;gap:6px;margin-top:8px}
+.nadd textarea{min-height:60px;resize:vertical}
+@media(max-width:600px){dialog.dlg form{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cgrid,.forms{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.tbl thead{display:none}.tbl tr{display:grid;grid-template-columns:minmax(0,1fr) auto;padding:8px 0;border-bottom:1px solid var(--line)}.tbl td{border:0;padding:2px 4px}.forms form{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:900px){.slip{grid-template-columns:minmax(0,1fr)}.res{position:static}.body{grid-template-columns:minmax(0,1fr)}}
@@ -143,7 +162,7 @@ function showLogin(){
 }
 async function boot(){
  let st;try{st=await api("/api/admin/estado");}catch(e){return;}
- root.innerHTML=`<header><img src="${LOGO}" alt=""><h1>La Gitanilla</h1><nav class="tabs" role="tablist"><button class="tab" role="tab" type="button" data-t="ped" aria-selected="true">Pedidos</button><button class="tab" role="tab" type="button" data-t="con" aria-selected="false">Contabilidad</button></nav><a class="b o" href="/api/admin/export.csv">Excel de pedidos</a><button class="b o" id="out" type="button">Salir</button></header>
+ root.innerHTML=`<header><img src="${LOGO}" alt=""><h1>La Gitanilla</h1><nav class="tabs" role="tablist"><button class="tab" role="tab" type="button" data-t="ped" aria-selected="true">Pedidos</button><button class="tab" role="tab" type="button" data-t="con" aria-selected="false">Contabilidad</button><button class="tab" role="tab" type="button" data-t="not" aria-selected="false">Notas</button></nav><a class="b o" href="/api/admin/export.csv">Excel de pedidos</a><button class="b o" id="out" type="button">Salir</button></header>
  <main id="tped">
  <div class="warn">${!st.persistente?`<div class="bad">⚠ No hay volumen conectado en Railway: los pedidos se borran cada vez que actualizas la página. Conecta un volumen antes de usarlo con clientes.</div>`:""}${!st.mercadopago?`<div>Mercado Pago no está conectado: los clientes solo verán transferencia. Agrega MP_ACCESS_TOKEN en Railway.</div>`:""}${!st.banco?`<div>Sin datos bancarios: agrega BANK_NAME, BANK_HOLDER y BANK_CLABE en Railway para ofrecer transferencia.</div>`:""}</div>
  <form class="slip" id="nf" novalidate>
@@ -177,10 +196,10 @@ async function boot(){
  <div class="bar"><h2>Base de pedidos</h2><input id="q" type="search" placeholder="Buscar nombre, folio, ciudad…" aria-label="Buscar"><button class="b o" type="button" id="rf">Actualizar</button></div>
  <div class="chips" id="fc" role="group" aria-label="Filtrar por estado"></div>
  <div class="list" id="list"><p class="empty">Cargando…</p></div>
- </main><main id="tcon" hidden></main>`;
+ </main><main id="tcon" hidden></main><main id="tnot" hidden></main><dialog class="dlg" id="dlg"></dialog>`;
  $("out").addEventListener("click",async()=>{await api("/api/admin/logout",{method:"POST"}).catch(()=>{});showLogin();});
  setupForm();renderChips();load();
- document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("[data-t]");if(!b)return;for(const t of document.querySelectorAll(".tab"))t.setAttribute("aria-selected",String(t===b));$("tped").hidden=b.dataset.t!=="ped";$("tcon").hidden=b.dataset.t!=="con";if(b.dataset.t==="con")loadConta();});
+ document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("[data-t]");if(!b)return;for(const t of document.querySelectorAll(".tab"))t.setAttribute("aria-selected",String(t===b));$("tped").hidden=b.dataset.t!=="ped";$("tcon").hidden=b.dataset.t!=="con";$("tnot").hidden=b.dataset.t!=="not";if(b.dataset.t==="con")loadConta();if(b.dataset.t==="not")loadNotas();});
  $("rf").addEventListener("click",load);
  $("q").addEventListener("input",e=>{q=e.target.value.toLowerCase();renderList();});
 }
@@ -224,13 +243,14 @@ function setupForm(){
 async function copy(t,btn){try{await navigator.clipboard.writeText(t);btn.textContent="Copiado ✓";}catch(e){btn.textContent="Cópialo a mano";}}
 function renderChips(){
  const all=[["all","Todos"],["pend","Sin pagar"],["anticipo","Anticipo"],["pagado","Pagados"],["en_taller","En taller"],["enviado","Enviados"],["entregado","Entregados"],["cancelado","Cancelados"]];
- $("fc").innerHTML=all.map(([k,l])=>`<button class="chip" type="button" data-k="${k}" aria-pressed="${k===filt}">${l}</button>`).join("");
+ const cnt=k=>orders.filter(o=>k==="all"?o.estado!=="cancelado":k==="pend"?["nuevo","datos"].includes(o.estado):o.estado===k).length;
+ $("fc").innerHTML=all.map(([k,l])=>{const n=cnt(k);return `<button class="chip" type="button" data-k="${k}" aria-pressed="${k===filt}">${l}${n?` <span style="opacity:.7">(${n})</span>`:""}</button>`;}).join("");
  $("fc").onclick=e=>{const b=e.target.closest("[data-k]");if(!b)return;filt=b.dataset.k;renderChips();renderList();};
 }
-async function load(){try{orders=await api("/api/admin/pedidos");window.orders=orders;renderList();}catch(e){$("list").innerHTML=`<p class="empty">${esc(e.message)}</p>`;}}
+async function load(){try{orders=await api("/api/admin/pedidos");window.orders=orders;renderChips();renderList();}catch(e){$("list").innerHTML=`<p class="empty">${esc(e.message)}</p>`;}}
 function renderList(){
- const L=orders.filter(o=>(filt==="all"||(filt==="pend"?["nuevo","datos"].includes(o.estado):o.estado===filt))&&(!q||[o.folio,o.nombre,o.apellido,o.ciudad,o.modelo,o.telefono].join(" ").toLowerCase().includes(q)));
- if(!L.length){$("list").innerHTML=`<p class="empty">${orders.length?"Ningún pedido con ese filtro.":"Todavía no hay pedidos. Crea el primero arriba."}</p>`;return;}
+ const L=orders.filter(o=>((filt==="all"&&o.estado!=="cancelado")||(filt==="pend"?["nuevo","datos"].includes(o.estado):o.estado===filt))&&(!q||[o.folio,o.nombre,o.apellido,o.ciudad,o.modelo,o.telefono].join(" ").toLowerCase().includes(q)));
+ if(!L.length){$("list").innerHTML=`<p class="empty">${orders.length?(filt==="all"?"No hay pedidos activos. Los cancelados están en el filtro Cancelados.":"Ningún pedido con ese filtro."):"Todavía no hay pedidos. Crea el primero arriba."}</p>`;return;}
  const base=location.origin+"/p/";
  $("list").innerHTML=L.map(o=>`<details class="o" data-c="${o.code}"><summary>
  <img src="${o.foto?"/api/pedido/"+o.code+"/foto":LOGO}" alt="" loading="lazy">
@@ -243,15 +263,34 @@ function renderList(){
  <h3>Link del cliente</h3><p style="overflow-wrap:anywhere">${base}${o.code}</p><div class="acts"><button class="b o" type="button" data-a="copy">Copiar</button>${o.telefono?`<a class="b w" target="_blank" rel="noopener" href="https://wa.me/${o.telefono.replace(/\D/g,"").length===10?"52":""}${o.telefono.replace(/\D/g,"")}">WhatsApp</a>`:""}</div></div>
  <div><h3>Montura</h3><ul>${o.specs.map(s=>`<li>${esc(s[0])}: ${esc(s[1])}</li>`).join("")||"<li>Sin especificaciones</li>"}</ul>${o.entrega?`<p style="margin-top:6px">Entrega: ${esc(o.entrega)}</p>`:""}
  <h3>Dinero</h3><p>${o.costos>0?`Costos asignados ${money(o.costos)} · <b class="${o.total-o.costos>=0?"pos":"neg"}">Utilidad ${money(o.total-o.costos)}</b><br>`:""}Total ${money(o.total)} · Anticipo ${o.anticipoPct>0&&o.anticipoPct<100?o.anticipoPct+"% = "+money(o.anticipo):"pago completo"}<br>Pagado ${money(o.pagado)} · Restante ${money(o.restante)}${o.cobrar_restante?"<br><b style='color:var(--amb)'>Cobro del restante habilitado</b>":""}</p>
- ${o.pagos.length?`<ul style="margin-top:6px">${o.pagos.map(p=>`<li>${p.id.startsWith("manual-")?`<button class="del" type="button" data-delpago="${p.id}" title="Borrar este pago" aria-label="Borrar este pago">×</button>`:""}${new Date(p.fecha).toLocaleDateString("es-MX")} · ${money(p.monto)} · ${esc(p.metodo)} · ${esc(({approved:"aprobado",pending:"pendiente",in_process:"en proceso",rejected:"rechazado",refunded:"devuelto",cancelled:"cancelado",charged_back:"contracargo"})[p.estado]||p.estado)}</li>`).join("")}</ul>`:""}</div>
+ ${o.pagos.length?`<ul style="margin-top:6px">${o.pagos.map(p=>`<li>${p.id.startsWith("manual-")?`<button class="ed" type="button" data-edpago="${p.id}" title="Corregir pago" aria-label="Corregir pago">✎</button><button class="del" type="button" data-delpago="${p.id}" title="Borrar este pago" aria-label="Borrar este pago">×</button>`:""}${new Date(p.fecha).toLocaleDateString("es-MX")} · ${money(p.monto)} · ${esc(p.metodo)} · ${esc(({approved:"aprobado",pending:"pendiente",in_process:"en proceso",rejected:"rechazado",refunded:"devuelto",cancelled:"cancelado",charged_back:"contracargo"})[p.estado]||p.estado)}</li>`).join("")}</ul>`:""}
+ <h3>Costos (privado)</h3>${o.costosList.length?o.costosList.map(g=>`<div class="mini" data-gid="${g.id}"><span>${esc(g.concepto)} · ${esc(g.categoria)} · <b style="color:var(--ink)">${money(g.monto)}</b></span><button class="ed" type="button" data-gact="edit" aria-label="Editar costo" title="Editar">✎</button><button class="del" type="button" data-gact="del" aria-label="Borrar costo" title="Borrar">×</button></div>`).join(""):`<p>Sin costos registrados.</p>`}
+ <button class="b o" type="button" data-a="addcosto" style="min-height:36px;margin-top:6px">+ Agregar costo</button></div>
  <div><h3>Acciones</h3><div class="acts">
+ <button class="b o" type="button" data-a="editar">Editar pedido o precio</button>
  <button class="b o" type="button" data-a="manual">Registrar pago recibido</button>
  ${o.pagado>0&&o.restante>0.01&&!o.cobrar_restante?`<button class="b o" type="button" data-a="cobrar_restante">Cobrar restante por el link</button>`:""}
  <button class="b o" type="button" data-a="en_taller">En taller</button><button class="b o" type="button" data-a="enviado">Enviado</button><button class="b o" type="button" data-a="entregado">Entregado</button>
  <button class="b r" type="button" data-a="cancelado">Cancelar pedido</button></div>
+ <h3>Notas internas</h3><div class="nlist">${o.notas.map(n=>notaHtml(n)).join("")}</div>
+ <div class="nadd"><textarea aria-label="Nueva nota para este pedido" placeholder="Ej. El cliente pidió cambiar el grabado…"></textarea><button class="b o" type="button" data-a="nota" style="justify-self:start;min-height:36px">Guardar nota</button></div>
  <p style="margin-top:10px;font-size:13px">Creado ${new Date(o.creado).toLocaleString("es-MX")}${o.datos_en?" · datos "+new Date(o.datos_en).toLocaleString("es-MX"):""}</p></div>
  </div></details>`).join("");
  $("list").onclick=async e=>{
+  const row=e.target.closest("[data-c]");const rcode=row&&row.dataset.c;const ro=orders.find(x=>x.code===rcode);
+  const refresh=async()=>{await load();openRow(rcode);};
+  try{
+   if(await noteAction(e,refresh))return;
+   const ep=e.target.closest("[data-edpago]");if(ep){if(await editPago(ro.pagos.find(x=>x.id===ep.dataset.edpago)))await refresh();return;}
+   const ga=e.target.closest("[data-gact]");if(ga){const g=ro.costosList.find(x=>x.id===ga.closest("[data-gid]").dataset.gid);
+    if(ga.dataset.gact==="edit"){if(await editGasto(g))await refresh();}
+    else{if(ga.dataset.sure!=="1"){ga.dataset.sure="1";ga.textContent="¿Borrar?";return;}await api("/api/admin/gastos/"+g.id,{method:"DELETE"});await refresh();}
+    return;}
+   const ab=e.target.closest("[data-a]");
+   if(ab&&ab.dataset.a==="editar"){if(await editPedido(ro))await refresh();return;}
+   if(ab&&ab.dataset.a==="addcosto"){if(await addGasto(rcode))await refresh();return;}
+   if(ab&&ab.dataset.a==="nota"){const ta=ab.parentElement.querySelector("textarea");if(!ta.value.trim()){ta.focus();return;}await api("/api/admin/notas",{method:"POST",body:JSON.stringify({texto:ta.value,code:rcode})});await refresh();return;}
+  }catch(err){const s=e.target.closest("button");if(s)s.textContent=err.message;return;}
   const dp=e.target.closest("[data-delpago]");if(dp){if(dp.dataset.sure!=="1"){dp.dataset.sure="1";dp.textContent="¿Borrar?";return;}const code=dp.closest("[data-c]").dataset.c;try{await api("/api/admin/pagos/"+dp.dataset.delpago,{method:"DELETE"});await load();openRow(code);}catch(err){dp.textContent="!";}return;}
   const b=e.target.closest("[data-a]");if(!b)return;const code=b.closest("[data-c]").dataset.c,a=b.dataset.a;
   if(a==="copy")return copy(base+code,b);
@@ -327,15 +366,61 @@ function renderConta(){
  ${sm.map(x=>`<div class="mrow"><span>${yl(x.k)}</span><div class="bars"><div class="br i" style="width:${x.i/mx*100}%"></div><div class="br g" style="width:${x.g/mx*100}%"></div></div><span class="v ${x.i-x.g>=0?"pos":"neg"}">${money(x.i-x.g)}</span></div>`).join("")}</div>
  <div class="box"><h3>Gastos por categoría</h3>${cats.length?cats.map(c=>`<div class="crow"><span>${esc(c[0])}</span><div class="br" style="width:${c[1]/cm*100}%"></div><span class="v">${money(c[1])}</span></div>`).join(""):'<p style="color:var(--soft)">Sin gastos en este periodo.</p>'}</div></div>
  <div class="box"><h3>Movimientos</h3>${L.length?`<div class="scroll"><table class="tbl"><thead><tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th>Método</th><th style="text-align:right">Monto</th><th></th></tr></thead><tbody>
- ${L.map(m=>`<tr><td>${new Date(String(m.f).length===10?m.f+"T12:00":m.f).toLocaleDateString("es-MX")}</td><td>${esc(m.c)}</td><td>${esc(m.cat)}</td><td>${esc(m.met||"")}</td><td class="n ${m.t==="i"?"pos":"neg"}">${m.t==="i"?"+":"−"}${money(m.m)}</td><td>${m.del?`<button class="del" type="button" data-del="${m.del}" data-id="${m.id}" aria-label="Borrar movimiento" title="Borrar">×</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:'<p style="color:var(--soft)">No hay movimientos en este periodo.</p>'}</div>
+ ${L.map(m=>`<tr><td>${new Date(String(m.f).length===10?m.f+"T12:00":m.f).toLocaleDateString("es-MX")}</td><td>${esc(m.c)}</td><td>${esc(m.cat)}</td><td>${esc(m.met||"")}</td><td class="n ${m.t==="i"?"pos":"neg"}">${m.t==="i"?"+":"−"}${money(m.m)}</td><td style="white-space:nowrap">${m.del?`<button class="ed" type="button" data-edit="${m.del}" data-id="${m.id}" aria-label="Editar movimiento" title="Editar">✎</button><button class="del" type="button" data-del="${m.del}" data-id="${m.id}" aria-label="Borrar movimiento" title="Borrar">×</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:'<p style="color:var(--soft)">No hay movimientos en este periodo.</p>'}</div>
  ${C.porCobrar.length?`<div class="box" style="margin-top:16px"><h3>Por cobrar</h3><div class="scroll"><table class="tbl"><thead><tr><th>Folio</th><th>Cliente</th><th>Estado</th><th style="text-align:right">Pagado</th><th style="text-align:right">Falta</th></tr></thead><tbody>${C.porCobrar.map(o=>`<tr><td>${esc(o.folio)}</td><td>${esc(o.nombre?o.nombre+" "+(o.apellido||""):o.modelo)}</td><td>${EST[o.estado]||o.estado}</td><td class="n">${money(o.pagado)}</td><td class="n" style="color:var(--amb)">${money(o.restante)}</td></tr>`).join("")}</tbody></table></div></div>`:""}
  <p class="cnote">Este es un control interno de ingresos y gastos. Para impuestos y facturación, comparte el Excel con tu contador.</p>`;
  $("per").addEventListener("change",e=>{per=e.target.value;renderConta();});
  $("fg").addEventListener("submit",async e=>{e.preventDefault();try{await api("/api/admin/gastos",{method:"POST",body:JSON.stringify({concepto:$("gc").value,categoria:$("gcat").value,monto:num($("gm").value),fecha:$("gf").value,metodo:$("gmet").value,code:$("gp").value})});await loadConta();await load();$("gst").textContent="Gasto guardado.";}catch(err){$("gst").textContent=err.message;}});
  $("fi").addEventListener("submit",async e=>{e.preventDefault();try{await api("/api/admin/otros-ingresos",{method:"POST",body:JSON.stringify({concepto:$("ic").value,monto:num($("im").value),fecha:$("if").value,metodo:$("imet").value})});await loadConta();$("ist").textContent="Ingreso guardado.";}catch(err){$("ist").textContent=err.message;}});
- $("tcon").querySelector(".tbl")?.addEventListener("click",async e=>{const b=e.target.closest("[data-del]");if(!b)return;if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="¿Borrar?";return;}
+ $("tcon").querySelector(".tbl")?.addEventListener("click",async e=>{const ed=e.target.closest("[data-edit]");
+  if(ed){const k=ed.dataset.edit,id=ed.dataset.id;let ok=false;try{
+   if(k==="gastos")ok=await editGasto(C.gastos.find(x=>x.id===id));
+   else if(k==="otros-ingresos")ok=await editOtro(C.otros.find(x=>x.id===id));
+   else ok=await editPago(C.pagos.find(x=>x.id===id));
+   if(ok){await loadConta();await load();}}catch(err){ed.textContent="!";}return;}
+  const b=e.target.closest("[data-del]");if(!b)return;if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="¿Borrar?";return;}
   const u=b.dataset.del==="pago"?"/api/admin/pagos/"+b.dataset.id:"/api/admin/"+b.dataset.del+"/"+b.dataset.id;
   try{await api(u,{method:"DELETE"});await loadConta();if(b.dataset.del==="pago")await load();}catch(err){b.textContent="!";}});
+}
+/* ---------- cuadro de edición ---------- */
+function ask(title,fields){return new Promise(res=>{const d=$("dlg");
+ d.innerHTML=`<h3>${esc(title)}</h3><form method="dialog" novalidate>${fields.map(f=>`<label class="${f.w?"w":""}" for="dq_${f.k}">${esc(f.l)}${f.t==="select"?`<select id="dq_${f.k}">${f.o.map(o=>`<option ${String(o)===String(f.v)?"selected":""}>${esc(o)}</option>`).join("")}</select>`:f.t==="sel2"?`<select id="dq_${f.k}">${f.o.map(o=>`<option value="${esc(o[0])}" ${String(o[0])===String(f.v??"")?"selected":""}>${esc(o[1])}</option>`).join("")}</select>`:f.t==="area"?`<textarea id="dq_${f.k}" rows="4">${esc(f.v??"")}</textarea>`:`<input id="dq_${f.k}" ${f.t==="date"?'type="date"':""} ${f.t==="num"?'inputmode="decimal"':""} value="${esc(f.v??"")}">`}</label>`).join("")}<p class="err" id="dqe"></p><div class="acts"><button class="b o" type="button" id="dqc">Cancelar</button><button class="b g" type="submit">Guardar</button></div></form>`;
+ const f=d.querySelector("form");
+ const done=v=>{d.close();res(v);};
+ $("dqc").onclick=()=>done(null);d.oncancel=e=>{e.preventDefault();done(null);};
+ f.onsubmit=e=>{e.preventDefault();const v={};for(const x of fields){const el=$("dq_"+x.k);v[x.k]=x.t==="num"?num(el.value):el.value.trim();if(x.req&&!v[x.k]){$("dqe").textContent="Falta: "+x.l;el.focus();return;}}done(v);};
+ d.showModal();const first=d.querySelector("input,select,textarea");if(first)first.focus();});}
+const orderOpts=()=>[["","General del taller"],...(window.orders||[]).filter(o=>o.estado!=="cancelado").map(o=>[o.code,o.folio+" · "+(o.nombre||o.modelo)])];
+async function editGasto(g){const v=await ask("Editar gasto",[{k:"concepto",l:"Concepto",v:g.concepto,w:1,req:1},{k:"categoria",l:"Categoría",t:"select",o:CATS,v:g.categoria},{k:"monto",l:"Monto",t:"num",v:g.monto,req:1},{k:"fecha",l:"Fecha",t:"date",v:String(g.fecha).slice(0,10)},{k:"metodo",l:"Pagado con",t:"select",o:["","Transferencia","Efectivo","Tarjeta","Otro"],v:g.metodo||""},{k:"code",l:"Pedido",t:"sel2",o:orderOpts(),v:g.code||"",w:1}]);
+ if(!v)return false;await api("/api/admin/gastos/"+g.id,{method:"PATCH",body:JSON.stringify(v)});return true;}
+async function addGasto(code){const v=await ask("Agregar costo al pedido",[{k:"concepto",l:"Concepto",w:1,req:1},{k:"categoria",l:"Categoría",t:"select",o:CATS,v:"Pieles"},{k:"monto",l:"Monto",t:"num",req:1},{k:"fecha",l:"Fecha",t:"date",v:ymd()},{k:"metodo",l:"Pagado con",t:"select",o:["Transferencia","Efectivo","Tarjeta","Otro"]}]);
+ if(!v)return false;await api("/api/admin/gastos",{method:"POST",body:JSON.stringify({...v,code})});return true;}
+async function editOtro(o){const v=await ask("Editar ingreso",[{k:"concepto",l:"Concepto",v:o.concepto,w:1,req:1},{k:"monto",l:"Monto",t:"num",v:o.monto,req:1},{k:"fecha",l:"Fecha",t:"date",v:String(o.fecha).slice(0,10)},{k:"metodo",l:"Cobrado con",t:"select",o:["","Efectivo","Transferencia","Tarjeta","Otro"],v:o.metodo||"",w:1}]);
+ if(!v)return false;await api("/api/admin/otros-ingresos/"+o.id,{method:"PATCH",body:JSON.stringify(v)});return true;}
+async function editPago(p){const v=await ask("Corregir pago",[{k:"monto",l:"Monto recibido",t:"num",v:p.monto,req:1},{k:"metodo",l:"Método",t:"select",o:["transferencia","efectivo","depósito","otro"],v:p.metodo}]);
+ if(!v)return false;await api("/api/admin/pagos/"+p.id,{method:"PATCH",body:JSON.stringify(v)});return true;}
+async function editPedido(o){const v=await ask("Editar pedido "+o.folio,[{k:"modelo",l:"Montura",v:o.modelo,w:1,req:1},{k:"precio",l:"Precio de la montura",t:"num",v:o.precio,req:1},{k:"envio",l:"Envío",t:"num",v:o.envio},{k:"anticipo",l:"Anticipo %",t:"num",v:o.anticipoPct},{k:"entrega",l:"Entrega estimada",v:o.entrega},{k:"nota",l:"Nota para el cliente (la ve el cliente)",v:o.nota,w:1}]);
+ if(!v)return false;await api("/api/admin/pedidos/"+o.code,{method:"PATCH",body:JSON.stringify({accion:"editar",...v})});return true;}
+/* ---------- notas ---------- */
+const fdt=f=>new Date(f).toLocaleString("es-MX",{dateStyle:"medium",timeStyle:"short"});
+const notaHtml=n=>`<div class="nota" data-nid="${n.id}"><p>${esc(n.texto)}</p><div class="nm"><span>${fdt(n.fecha)}${n.folio?" · "+esc(n.folio)+(n.nombre?" · "+esc(n.nombre):""):""}</span><button class="ed" type="button" data-nact="edit" aria-label="Editar nota" title="Editar">✎</button><button class="del" type="button" data-nact="del" aria-label="Borrar nota" title="Borrar">×</button></div></div>`;
+let NOTAS=[];
+async function noteAction(e,after){const b=e.target.closest("[data-nact]");if(!b)return false;const id=b.closest("[data-nid]").dataset.nid;
+ if(b.dataset.nact==="del"){if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="¿Borrar?";return true;}await api("/api/admin/notas/"+id,{method:"DELETE"});}
+ else{const t=b.closest(".nota").querySelector("p").textContent;const v=await ask("Editar nota",[{k:"texto",l:"Nota",t:"area",v:t,w:1,req:1}]);if(!v)return true;await api("/api/admin/notas/"+id,{method:"PATCH",body:JSON.stringify(v)});}
+ await after();return true;}
+async function loadNotas(){const t=$("tnot");
+ try{NOTAS=await api("/api/admin/notas");}catch(e){t.innerHTML=`<p class="empty">${esc(e.message)}</p>`;return;}
+ t.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px"><h2 style="font-size:22px;color:var(--gold);margin-right:auto">Notas internas</h2><input id="nq" type="search" placeholder="Buscar en notas…" aria-label="Buscar en notas" style="max-width:260px"></div>
+ <p style="color:var(--soft);font-size:14px;margin:-4px 0 12px">Solo ustedes las ven. Las notas de cada pedido también aparecen aquí.</p>
+ <form class="box nadd" id="nf2"><label for="nt">Nueva nota<textarea id="nt" placeholder="Pendiente: pedir 3 m² de avestruz rojo al proveedor…"></textarea></label>
+ <label for="nc">Relacionar con un pedido <small>opcional</small><select id="nc">${orderOpts().map(o=>`<option value="${esc(o[0])}">${esc(o[0]?o[1]:"Nota general")}</option>`).join("")}</select></label>
+ <button class="b g" type="submit" style="justify-self:start">Guardar nota</button><p class="st" id="nst2"></p></form>
+ <div class="nlist" id="nl"></div>`;
+ const draw=()=>{const q=($("nq").value||"").toLowerCase();const L=NOTAS.filter(n=>!q||[n.texto,n.folio,n.nombre].join(" ").toLowerCase().includes(q));$("nl").innerHTML=L.length?L.map(notaHtml).join(""):'<p class="empty">No hay notas todavía.</p>';};
+ draw();$("nq").addEventListener("input",draw);
+ $("nf2").addEventListener("submit",async e=>{e.preventDefault();try{await api("/api/admin/notas",{method:"POST",body:JSON.stringify({texto:$("nt").value,code:$("nc").value})});$("nt").value="";await loadNotas();load();}catch(err){$("nst2").textContent=err.message;}});
+ $("nl").addEventListener("click",async e=>{try{await noteAction(e,async()=>{await loadNotas();load();});}catch(err){}});
 }
 function openRow(code){const d=document.querySelector(`[data-c="${code}"]`);if(d)d.open=true;}
 fetch("/api/admin/estado",{credentials:"same-origin"}).then(r=>r.ok?boot():showLogin()).catch(showLogin);
