@@ -179,7 +179,23 @@ const server = http.createServer(async (req, res) => {
     if ((M === "GET" || M === "HEAD") && STATIC[p]) return serveFile(req, res, STATIC[p], p.startsWith("/admin") ? "no-store" : "public, max-age=300");
     if ((M === "GET" || M === "HEAD") && /^\/v\d\.mp4$/.test(p)) return serveFile(req, res, p.slice(1));
     let m;
-    if (M === "GET" && (m = /^\/p\/([A-Z0-9]{6,12})\/?$/.exec(p))) return serveFile(req, res, "pedido.html", "no-store");
+    if ((M === "GET" || M === "HEAD") && (m = /^\/p\/([A-Z0-9]{6,12})\/?$/.exec(p))) {
+      // Tarjeta de vista previa (WhatsApp, Facebook) con el logo y el folio del pedido.
+      const o = getOrder(m[1]);
+      let html;
+      try { html = fs.readFileSync(path.join(ROOT, "pedido.html"), "utf8"); } catch { return send(res, 404, "No encontrado", "text/plain; charset=utf-8"); }
+      const base = baseUrl(req);
+      const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+      const title = o ? `Tu pedido ${o.folio} · Monturas La Gitanilla` : "Tu pedido · Monturas La Gitanilla";
+      const desc = o ? `${o.modelo}. Revisa tu montura, llena tus datos de envío y paga de forma segura.` : "Revisa tu montura, llena tus datos de envío y paga de forma segura.";
+      html = html
+        .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${esc(title)}">`)
+        .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${esc(desc)}">`)
+        .replace(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${base}/compartir.jpg">\n<meta property="og:image:secure_url" content="${base}/compartir.jpg">\n<meta property="og:image:type" content="image/jpeg">\n<meta property="og:url" content="${base}/p/${m[1]}">`);
+      const buf = Buffer.from(html, "utf8");
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Content-Length": buf.length, "Cache-Control": "no-store", ...SEC_HEADERS });
+      return res.end(M === "HEAD" ? undefined : buf);
+    }
     if (M === "GET" && p === "/salud") return send(res, 200, { ok: true });
 
     // --- cliente ---
