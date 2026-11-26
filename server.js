@@ -148,8 +148,8 @@ const LABEL = { nombre: "nombre", apellido: "apellidos", telefono: "teléfono", 
 const REQ = { nombre: 60, apellido: 80, telefono: 20, calle: 150, colonia: 100, cp: 10, ciudad: 80, estado: 60, pais: 40, referencias: 300 };
 
 // ---------- archivos estáticos ----------
-const STATIC = { "/": "index.html", "/index.html": "index.html", "/pago.html": "pago.html", "/compartir.jpg": "compartir.jpg", "/favicon.png": "favicon.png", "/favicon.ico": "favicon.png", "/admin": "admin.html", "/admin.html": "admin.html" };
-const TYPES = { ".html": "text/html; charset=utf-8", ".jpg": "image/jpeg", ".png": "image/png", ".mp4": "video/mp4", ".webp": "image/webp" };
+const STATIC = { "/": "index.html", "/index.html": "index.html", "/pago.html": "pago.html", "/compartir.jpg": "compartir.jpg", "/favicon.png": "favicon.png", "/favicon.ico": "favicon.png", "/manifest.webmanifest": "manifest.webmanifest", "/sw.js": "sw.js", "/icon-192.png": "icon-192.png", "/icon-512.png": "icon-512.png", "/admin": "admin.html", "/admin.html": "admin.html" };
+const TYPES = { ".webmanifest": "application/manifest+json", ".js": "text/javascript; charset=utf-8", ".html": "text/html; charset=utf-8", ".jpg": "image/jpeg", ".png": "image/png", ".mp4": "video/mp4", ".webp": "image/webp" };
 function serveFile(req, res, file, cache = "public, max-age=300") {
   const fp = path.join(ROOT, file);
   fs.stat(fp, (err, st) => {
