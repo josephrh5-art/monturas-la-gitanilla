@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS gastos(
   id TEXT PRIMARY KEY, fecha TEXT, concepto TEXT, categoria TEXT, monto REAL, metodo TEXT, code TEXT, nota TEXT, creado TEXT);
 CREATE TABLE IF NOT EXISTS otros_ingresos(
   id TEXT PRIMARY KEY, fecha TEXT, concepto TEXT, categoria TEXT, monto REAL, metodo TEXT, creado TEXT);
+CREATE TABLE IF NOT EXISTS notas(
+  id TEXT PRIMARY KEY, code TEXT, texto TEXT, fecha TEXT);
 CREATE TABLE IF NOT EXISTS pagos(
   id TEXT PRIMARY KEY, code TEXT, monto REAL, metodo TEXT, estado TEXT, fecha TEXT);`);
 
@@ -124,6 +126,14 @@ function recordPayment(code, id, monto, metodo, estado) {
   }
 }
 
+function recompute(code) {
+  const o = getOrder(code); if (!o) return;
+  const pagado = money((db.prepare("SELECT SUM(monto) s FROM pagos WHERE code=? AND estado='approved'").get(code) || {}).s || 0);
+  const t = totals({ ...o, pagado });
+  let est = o.estado;
+  if (!["en_taller", "enviado", "entregado", "cancelado"].includes(o.estado)) est = pagado < 0.01 ? (o.datos_en ? "datos" : "nuevo") : t.restante < 0.01 ? "pagado" : "anticipo";
+  db.prepare("UPDATE pedidos SET pagado=?, estado=?, actualizado=? WHERE code=?").run(pagado, est, now(), code);
+}
 // ---------- vista pública del pedido ----------
 function publicOrder(o) {
   const t = totals(o);
@@ -238,7 +248,7 @@ const server = http.createServer(async (req, res) => {
       if (M === "GET" && p === "/api/admin/estado") return send(res, 200, { persistente: PERSISTENT, mercadopago: Boolean(MP_TOKEN), banco: BANK.clabe.length === 18 });
       if (M === "GET" && p === "/api/admin/pedidos") {
         const rows = db.prepare("SELECT * FROM pedidos ORDER BY creado DESC").all();
-        return send(res, 200, rows.map((o) => ({ ...o, foto: Boolean(o.foto), specs: JSON.parse(o.specs || "[]"), ...totals(o), anticipoPct: o.anticipo, costos: money((db.prepare("SELECT SUM(monto) s FROM gastos WHERE code=?").get(o.code) || {}).s || 0), pagos: db.prepare("SELECT * FROM pagos WHERE code=? ORDER BY fecha").all(o.code) })));
+        return send(res, 200, rows.map((o) => ({ ...o, foto: Boolean(o.foto), specs: JSON.parse(o.specs || "[]"), ...totals(o), anticipoPct: o.anticipo, costos: money((db.prepare("SELECT SUM(monto) s FROM gastos WHERE code=?").get(o.code) || {}).s || 0), costosList: db.prepare("SELECT * FROM gastos WHERE code=? ORDER BY fecha").all(o.code), notas: db.prepare("SELECT * FROM notas WHERE code=? ORDER BY fecha DESC").all(o.code), pagos: db.prepare("SELECT * FROM pagos WHERE code=? ORDER BY fecha").all(o.code) })));
       }
       if (M === "POST" && p === "/api/admin/pedidos") {
         const b = await readBody(req, 1_500_000);
@@ -289,16 +299,39 @@ const server = http.createServer(async (req, res) => {
         db.prepare(`DELETE FROM ${m[1] === "gastos" ? "gastos" : "otros_ingresos"} WHERE id=?`).run(m[2]);
         return send(res, 200, { ok: true });
       }
-      if (M === "DELETE" && (m = /^\/api\/admin\/pagos\/(manual-[0-9a-f-]{36})$/.exec(p))) {
+      if ((m = /^\/api\/admin\/pagos\/(manual-[0-9a-f-]{36})$/.exec(p)) && (M === "DELETE" || M === "PATCH")) {
         const pg = db.prepare("SELECT * FROM pagos WHERE id=?").get(m[1]); if (!pg) return send(res, 404, { error: "No existe" });
-        db.prepare("DELETE FROM pagos WHERE id=?").run(pg.id);
-        const o = getOrder(pg.code);
-        if (o && pg.estado === "approved") {
-          const pagado = money(Math.max(0, o.pagado - pg.monto));
-          const t = totals({ ...o, pagado });
-          const est = ["en_taller", "enviado", "entregado", "cancelado"].includes(o.estado) ? o.estado : pagado < 0.01 ? (o.datos_en ? "datos" : "nuevo") : t.restante < 0.01 ? "pagado" : "anticipo";
-          db.prepare("UPDATE pedidos SET pagado=?, estado=?, actualizado=? WHERE code=?").run(pagado, est, now(), o.code);
+        if (M === "DELETE") db.prepare("DELETE FROM pagos WHERE id=?").run(pg.id);
+        else {
+          const b = await readBody(req, 5_000); const monto = money(b.monto);
+          if (!(monto > 0)) return send(res, 400, { error: "Monto inválido" });
+          db.prepare("UPDATE pagos SET monto=?, metodo=? WHERE id=?").run(monto, str(b.metodo, 40) || pg.metodo, pg.id);
         }
+        recompute(pg.code);
+        return send(res, 200, { ok: true });
+      }
+      if (M === "PATCH" && (m = /^\/api\/admin\/(gastos|otros-ingresos)\/([0-9a-f-]{36})$/.exec(p))) {
+        const b = await readBody(req, 10_000);
+        const monto = money(b.monto); const concepto = str(b.concepto, 120);
+        if (!(monto > 0) || !concepto) return send(res, 400, { error: "Pon concepto y monto." });
+        if (m[1] === "gastos") {
+          const code = b.code && getOrder(String(b.code)) ? String(b.code) : null;
+          db.prepare("UPDATE gastos SET concepto=?,categoria=?,monto=?,fecha=?,metodo=?,code=? WHERE id=?").run(concepto, str(b.categoria, 40) || "Otros", monto, fechaOk(b.fecha), str(b.metodo, 40), code, m[2]);
+        } else db.prepare("UPDATE otros_ingresos SET concepto=?,monto=?,fecha=?,metodo=? WHERE id=?").run(concepto, monto, fechaOk(b.fecha), str(b.metodo, 40), m[2]);
+        return send(res, 200, { ok: true });
+      }
+      // ---- notas internas ----
+      if (M === "GET" && p === "/api/admin/notas") return send(res, 200, db.prepare("SELECT n.*, o.folio, o.nombre FROM notas n LEFT JOIN pedidos o ON o.code=n.code ORDER BY n.fecha DESC").all());
+      if (M === "POST" && p === "/api/admin/notas") {
+        const b = await readBody(req, 20_000); const texto = str(b.texto, 3000);
+        if (!texto) return send(res, 400, { error: "Escribe la nota." });
+        const code = b.code && getOrder(String(b.code)) ? String(b.code) : null;
+        db.prepare("INSERT INTO notas(id,code,texto,fecha) VALUES(?,?,?,?)").run(crypto.randomUUID(), code, texto, now());
+        return send(res, 201, { ok: true });
+      }
+      if ((m = /^\/api\/admin\/notas\/([0-9a-f-]{36})$/.exec(p)) && (M === "DELETE" || M === "PATCH")) {
+        if (M === "DELETE") db.prepare("DELETE FROM notas WHERE id=?").run(m[1]);
+        else { const b = await readBody(req, 20_000); const texto = str(b.texto, 3000); if (!texto) return send(res, 400, { error: "Escribe la nota." }); db.prepare("UPDATE notas SET texto=? WHERE id=?").run(texto, m[1]); }
         return send(res, 200, { ok: true });
       }
       if (M === "GET" && p === "/api/admin/conta.csv") {
@@ -322,6 +355,14 @@ const server = http.createServer(async (req, res) => {
       if ((m = /^\/api\/admin\/pedidos\/([A-Z0-9]{6,12})$/.exec(p)) && M === "PATCH") {
         const o = getOrder(m[1]); if (!o) return send(res, 404, { error: "No existe" });
         const b = await readBody(req, 10_000);
+        if (b.accion === "editar") {
+          const precio = money(b.precio), envio = money(b.envio), anticipo = Math.min(100, Math.max(0, Number(b.anticipo) || 0));
+          if (!(precio > 0)) return send(res, 400, { error: "El precio debe ser mayor a 0." });
+          const specs = Array.isArray(b.specs) ? JSON.stringify(b.specs.slice(0, 20).map((x) => [str(x[0], 40), str(x[1], 160)]).filter((x) => x[0] && x[1])) : o.specs;
+          db.prepare("UPDATE pedidos SET modelo=?,precio=?,envio=?,anticipo=?,entrega=?,nota=?,specs=?,actualizado=? WHERE code=?").run(str(b.modelo, 120) || o.modelo, precio, envio, anticipo, str(b.entrega, 80), str(b.nota, 300), specs, now(), o.code);
+          recompute(o.code);
+          return send(res, 200, { ok: true });
+        }
         if (b.accion === "cobrar_restante") db.prepare("UPDATE pedidos SET cobrar_restante=1, actualizado=? WHERE code=?").run(now(), o.code);
         else if (b.accion === "pago_manual") {
           const monto = money(b.monto); if (!(monto > 0)) return send(res, 400, { error: "Monto inválido" });
