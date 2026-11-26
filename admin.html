@@ -83,7 +83,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .login img{width:90px;margin:0 auto 10px}
 .login form{display:grid;gap:10px;margin-top:14px}
 .login .err{color:var(--bad);min-height:1.4em;font-size:15px}
-.tabs{display:flex;gap:6px;margin-right:auto;margin-left:8px}
+.tabs{display:flex;gap:6px;margin-right:auto;margin-left:8px;flex-wrap:wrap}
 .tab{min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:transparent;cursor:pointer;font-weight:700}
 .tab[aria-selected=true]{background:var(--gold);color:#1a1209;border-color:var(--gold)}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0 20px}
@@ -162,8 +162,8 @@ function showLogin(){
 }
 async function boot(){
  let st;try{st=await api("/api/admin/estado");}catch(e){return;}
- root.innerHTML=`<header><img src="${LOGO}" alt=""><h1>La Gitanilla</h1><nav class="tabs" role="tablist"><button class="tab" role="tab" type="button" data-t="ped" aria-selected="true">Pedidos</button><button class="tab" role="tab" type="button" data-t="con" aria-selected="false">Contabilidad</button><button class="tab" role="tab" type="button" data-t="not" aria-selected="false">Notas</button></nav><a class="b o" href="/api/admin/export.csv">Excel de pedidos</a><button class="b o" id="out" type="button">Salir</button></header>
- <main id="tped">
+ root.innerHTML=`<header><img src="${LOGO}" alt=""><h1>La Gitanilla</h1><nav class="tabs" role="tablist"><button class="tab" role="tab" type="button" data-t="new" aria-selected="true">Nuevo pedido</button><button class="tab" role="tab" type="button" data-t="ped" aria-selected="false">Base de pedidos</button><button class="tab" role="tab" type="button" data-t="con" aria-selected="false">Contabilidad</button><button class="tab" role="tab" type="button" data-t="not" aria-selected="false">Notas</button></nav><a class="b o" href="/api/admin/export.csv">Excel de pedidos</a><button class="b o" id="out" type="button">Salir</button></header>
+ <main id="tnew">
  <div class="warn">${!st.persistente?`<div class="bad">⚠ No hay volumen conectado en Railway: los pedidos se borran cada vez que actualizas la página. Conecta un volumen antes de usarlo con clientes.</div>`:""}${!st.mercadopago?`<div>Mercado Pago no está conectado: los clientes solo verán transferencia. Agrega MP_ACCESS_TOKEN en Railway.</div>`:""}${!st.banco?`<div>Sin datos bancarios: agrega BANK_NAME, BANK_HOLDER y BANK_CLABE en Railway para ofrecer transferencia.</div>`:""}</div>
  <form class="slip" id="nf" novalidate>
  <h2>Nuevo pedido</h2>
@@ -193,13 +193,14 @@ async function boot(){
  <div id="made"></div><p class="st" id="nst"></p>
  </aside>
  </form>
+ </main><main id="tped" hidden>
  <div class="bar"><h2>Base de pedidos</h2><input id="q" type="search" placeholder="Buscar nombre, folio, ciudad…" aria-label="Buscar"><button class="b o" type="button" id="rf">Actualizar</button></div>
  <div class="chips" id="fc" role="group" aria-label="Filtrar por estado"></div>
  <div class="list" id="list"><p class="empty">Cargando…</p></div>
  </main><main id="tcon" hidden></main><main id="tnot" hidden></main><dialog class="dlg" id="dlg"></dialog>`;
  $("out").addEventListener("click",async()=>{await api("/api/admin/logout",{method:"POST"}).catch(()=>{});showLogin();});
  setupForm();renderChips();load();
- document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("[data-t]");if(!b)return;for(const t of document.querySelectorAll(".tab"))t.setAttribute("aria-selected",String(t===b));$("tped").hidden=b.dataset.t!=="ped";$("tcon").hidden=b.dataset.t!=="con";$("tnot").hidden=b.dataset.t!=="not";if(b.dataset.t==="con")loadConta();if(b.dataset.t==="not")loadNotas();});
+ document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("[data-t]");if(!b)return;for(const t of document.querySelectorAll(".tab"))t.setAttribute("aria-selected",String(t===b));$("tnew").hidden=b.dataset.t!=="new";$("tped").hidden=b.dataset.t!=="ped";if(b.dataset.t==="ped")load();$("tcon").hidden=b.dataset.t!=="con";$("tnot").hidden=b.dataset.t!=="not";if(b.dataset.t==="con")loadConta();if(b.dataset.t==="not")loadNotas();});
  $("rf").addEventListener("click",load);
  $("q").addEventListener("input",e=>{q=e.target.value.toLowerCase();renderList();});
 }
@@ -233,7 +234,8 @@ function setupForm(){
    const j=await api("/api/admin/pedidos",{method:"POST",body:JSON.stringify(body)});
    const n=$("cnom").value.trim(),ph=$("ctel").value.replace(/\D/g,"");
    const txt=`Hola${n?" "+n:""}, aquí está tu pedido de Monturas La Gitanilla (folio ${j.folio}). Llena tus datos de envío y paga de forma segura aquí:\n${j.link}`;
-   $("made").innerHTML=`<div class="linkbox">${esc(j.link)}</div><div class="acts"><button class="b g" type="button" id="cpl">Copiar link</button><a class="b w" target="_blank" rel="noopener" href="${ph.length===10?"https://wa.me/52"+ph:"https://wa.me/"}?text=${encodeURIComponent(txt)}">Enviar por WhatsApp</a><a class="b o" target="_blank" rel="noopener" href="${esc(j.link)}">Ver como cliente</a></div>`;
+   $("made").innerHTML=`<div class="linkbox">${esc(j.link)}</div><div class="acts"><button class="b g" type="button" id="cpl">Copiar link</button><a class="b w" target="_blank" rel="noopener" href="${ph.length===10?"https://wa.me/52"+ph:"https://wa.me/"}?text=${encodeURIComponent(txt)}">Enviar por WhatsApp</a><a class="b o" target="_blank" rel="noopener" href="${esc(j.link)}">Ver como cliente</a><button class="b o" type="button" id="gobase">Ver en base de pedidos</button></div>`;
+   $("gobase").addEventListener("click",()=>{document.querySelector('.tab[data-t=ped]').click();setTimeout(()=>openRow(j.code),150);});
    $("cpl").addEventListener("click",()=>copy(j.link,$("cpl")));
    $("nst").textContent="Pedido "+j.folio+" creado.";for(const r of $("costs").children)r.children[2].value="";calc();C=null;load();
   }catch(err){$("nst").textContent=err.message;}
