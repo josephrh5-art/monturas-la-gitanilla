@@ -3,8 +3,14 @@
 <head>
 <meta charset="utf-8">
 <link rel="icon" type="image/png" href="/favicon.png">
-<link rel="apple-touch-icon" href="/favicon.png">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="La Gitanilla">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Pedidos · La Gitanilla</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +28,7 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Alegreya Sans",system-ui,sans-serif;overflow-x:clip}
 h1,h2,h3{font-family:Cinzel,Georgia,serif;margin:0;line-height:1.1}
 button{font:inherit;color:inherit}
-header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px max(4vw,16px);border-bottom:1px solid var(--line)}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:max(10px,env(safe-area-inset-top)) max(4vw,16px) 10px;border-bottom:1px solid var(--line)}
 header img{width:42px;height:42px}
 header h1{font-size:20px;color:var(--gold)}
 main{max-width:1240px;margin:auto;padding:20px max(4vw,16px) 60px}
@@ -425,6 +431,7 @@ async function loadNotas(){const t=$("tnot");
  $("nl").addEventListener("click",async e=>{try{await noteAction(e,async()=>{await loadNotas();load();});}catch(err){}});
 }
 function openRow(code){const d=document.querySelector(`[data-c="${code}"]`);if(d)d.open=true;}
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});
 fetch("/api/admin/estado",{credentials:"same-origin"}).then(r=>r.ok?boot():showLogin()).catch(showLogin);
 }
 </script>
